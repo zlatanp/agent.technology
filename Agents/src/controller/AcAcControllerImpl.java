@@ -3,6 +3,7 @@ package controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,13 +14,16 @@ import java.util.Set;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import com.google.gson.Gson;
 
 import model.Agent;
 import model.AgentCentre;
@@ -28,7 +32,7 @@ import model.AgentType;
 @Startup
 @Singleton
 @Path("/agents")
-public class AcAcControllerImpl implements AcAcController {
+public class AcAcControllerImpl{
 
 	private ArrayList<AgentCentre> allCentres = new ArrayList<AgentCentre>();
 	private ArrayList<AgentType> types = new ArrayList<AgentType>();
@@ -44,14 +48,16 @@ public class AcAcControllerImpl implements AcAcController {
 	private String myAdress;
 	private String alias = randomIdentifier();
 
-	@Override
+	
 	@POST
 	@Path("/node")
 	public String registerNewOnMaster() {
 
 		masterCenter = new AgentCentre();
-		masterCenter.setAdress("http://localhost:8080/Agents/rest/");
+		masterCenter.setAdress("8080");
 		masterCenter.setAlias("MasterCenter");
+		
+		boolean firstMaster = true;
 
 		myAdress = uriInfo.getBaseUri().toString();
 		String[] pom = myAdress.split(":");
@@ -60,7 +66,7 @@ public class AcAcControllerImpl implements AcAcController {
 
 		if (!(myAdress.equals("http://localhost:8080/Agents/rest/"))) {
 			System.out.println("Dodajem nemastere");
-			String url = "http://localhost:8080/Agents/rest/node/" + adress + "/" + alias;
+			String url = "http://localhost:8080/Agents/rest/agents/node/" + adress + "/" + alias;
 
 			try {
 
@@ -92,27 +98,46 @@ public class AcAcControllerImpl implements AcAcController {
 			}
 		} else {
 			System.out.println("Dodajem Mastera");
+			for (AgentCentre c : allCentres) {
+				if(c.getAlias().equals("MasterCenter"))
+					firstMaster = false;
+			}
+			if(firstMaster)
 			allCentres.add(masterCenter);
 		}
 
 		return null;
 	}
 	
+	
 	@GET
 	@Path("/node/{adress}/{aliasPassed}")
 	public void addToMaster(@PathParam("adress") String address, @PathParam("aliasPassed") String aliasPassed){
 		AgentCentre c = new AgentCentre(aliasPassed, address);
 		allCentres.add(c);
+		System.out.println("Dodajem neMastera");
+		//Dodaj listu svima drugima
+		updateListOfCenters();
+		
 	}
 	
-	@Override
+	
+	@POST
+	@Path("/updateCenters")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void updateCenters(ArrayList<AgentCentre> c){
+		allCentres = c;
+	}
+	
+	
+	
 	@GET
 	@Path("/all")
 	public void bla(){
 		System.out.println(allCentres.size());
 	}
 
-	@Override
+	
 	@GET
 	@Path("/agents/classes")
 	public String registerNewTypeOnMaster() {
@@ -120,13 +145,55 @@ public class AcAcControllerImpl implements AcAcController {
 		return null;
 	}
 
-	@Override
+	
 	@POST
 	@Path("/agents/running")
 	public String getRunningAgents() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public void updateListOfCenters(){
+		for(int i=1; i<allCentres.size(); i++){
+			try {
+
+				URL url = new URL("http://localhost:"+ allCentres.get(i).getAdress() +"/Agents/rest/agents/updateCenters");
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setDoOutput(true);
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("Content-Type", "application/json");
+
+				String input = new Gson().toJson(allCentres);
+
+				System.out.println("INPUT JE: " + input);
+				
+				OutputStream os = conn.getOutputStream();
+				os.write(input.getBytes());
+				os.flush();
+
+				BufferedReader br = new BufferedReader(new InputStreamReader(
+						(conn.getInputStream())));
+
+				String output;
+				System.out.println("Output from Server .... \n");
+				while ((output = br.readLine()) != null) {
+					System.out.println(output);
+				}
+
+				conn.disconnect();
+
+			  } catch (MalformedURLException e) {
+
+				e.printStackTrace();
+
+			  } catch (IOException e) {
+
+				e.printStackTrace();
+
+			 }
+		}
+	}
+	
 
 	// Generate random Alias for non-master chat app
 
