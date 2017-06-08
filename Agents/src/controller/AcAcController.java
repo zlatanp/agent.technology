@@ -32,7 +32,7 @@ import model.AgentType;
 @Startup
 @Singleton
 @Path("/agents")
-public class AcAcControllerImpl{
+public class AcAcController{
 
 	private ArrayList<AgentCentre> allCentres = new ArrayList<AgentCentre>();
 	private ArrayList<AgentType> types = new ArrayList<AgentType>();
