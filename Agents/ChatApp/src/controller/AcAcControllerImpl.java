@@ -19,6 +19,7 @@ import javax.ejb.Startup;
 import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -62,17 +63,14 @@ public class AcAcControllerImpl implements AcAcController {
 	@Path("/node")
 	public String registerNewOnMaster() {
 
-
 		masterCenter = new AgentCentre();
 		masterCenter.setAdress("8080");
 		masterCenter.setAlias("MasterCenter");
-		
+
 		AgentType ping = new AgentType("Ping", "8080");
 		AgentType pong = new AgentType("Pong", "8080");
 		AgentType mapReduce = new AgentType("MapReduce", "8090");
 		AgentType contractNet = new AgentType("ContractNet", "8100");
-		
-		
 
 		boolean firstMaster = true;
 
@@ -85,17 +83,17 @@ public class AcAcControllerImpl implements AcAcController {
 
 		if (!(myAdress.equals("http://localhost:8080/ChatApp/rest/"))) {
 			System.out.println("Dodajem nemastere");
-			
-			if(myAdress.equals("http://localhost:8090/ChatApp/rest/")){
+
+			if (myAdress.equals("http://localhost:8090/ChatApp/rest/")) {
 				ping.setModule("8090");
 				types.add(ping);
 				types.add(mapReduce);
-			}else if(myAdress.equals("http://localhost:8100/ChatApp/rest/")){
+			} else if (myAdress.equals("http://localhost:8100/ChatApp/rest/")) {
 				pong.setModule("8100");
 				types.add(pong);
 				types.add(contractNet);
 			}
-			
+
 			String url = "http://localhost:8080/ChatApp/rest/agents/node/" + adress + "/" + alias;
 
 			try {
@@ -125,8 +123,8 @@ public class AcAcControllerImpl implements AcAcController {
 				e.printStackTrace();
 
 			}
-			
-			//Salji tip svoj na 8080
+
+			// Salji tip svoj na 8080
 			try {
 				URL url2 = new URL("http://localhost:8080/ChatApp/rest/agents/updateType");
 				HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
@@ -161,14 +159,14 @@ public class AcAcControllerImpl implements AcAcController {
 				e.printStackTrace();
 
 			}
-			
+
 		} else {
 			System.out.println("Dodajem Mastera");
 			for (AgentCentre c : allCentres) {
 				if (c.getAlias().equals("MasterCenter"))
 					firstMaster = false;
 			}
-			if (firstMaster){
+			if (firstMaster) {
 				allCentres.add(masterCenter);
 				types.add(ping);
 				types.add(pong);
@@ -190,9 +188,9 @@ public class AcAcControllerImpl implements AcAcController {
 		// Dodaj listu svima drugima
 		for (int i = 0; i < allCentres.size(); i++) {
 			System.err.println(allCentres.size());
-			if(!allCentres.get(i).getAdress().equals("8080"))
+			if (!allCentres.get(i).getAdress().equals("8080"))
 				updateAllNodes(allCentres.get(i).getAdress());
-				
+
 		}
 
 	}
@@ -205,7 +203,7 @@ public class AcAcControllerImpl implements AcAcController {
 		System.out.println("USPIO:" + s);
 		this.allCentres = s;
 	}
-	
+
 	@Override
 	@POST
 	@Path("/updateType")
@@ -217,12 +215,12 @@ public class AcAcControllerImpl implements AcAcController {
 		}
 		for (int i = 0; i < allCentres.size(); i++) {
 			System.err.println(allCentres.size());
-			if(!allCentres.get(i).getAdress().equals("8080"))
+			if (!allCentres.get(i).getAdress().equals("8080"))
 				updateAllTypes(allCentres.get(i).getAdress());
-				
+
 		}
 	}
-	
+
 	@Override
 	@POST
 	@Path("/updateTypesAll")
@@ -232,7 +230,7 @@ public class AcAcControllerImpl implements AcAcController {
 		this.allTypes = t;
 	}
 
-	//Test liste
+	// Test liste
 	@Override
 	@GET
 	@Path("/all")
@@ -246,9 +244,43 @@ public class AcAcControllerImpl implements AcAcController {
 		for (AgentType tip : types) {
 			System.out.println(tip.getName());
 		}
+
 	}
 
-	//MASTER UPDATE TIPOVA NOVOG
+	@Override
+	@GET
+	@Path("/deleteMe")
+	public void deleteCent() {
+
+		String adresa = allCentres.get(2).getAdress();
+		String alias = allCentres.get(2).getAlias();
+		System.out.println(adresa + " " + alias);
+		allCentres.remove(2);
+
+		System.err.println(allCentres.size());
+		for (int i = 0; i < allCentres.size(); i++) {
+			System.out.println("ulazim u: " + allCentres.get(i).getAdress());
+			if (!allCentres.get(i).getAdress().equals("8080"))
+				deleteOneCenter(allCentres.get(i).getAdress(), alias);
+
+		}
+		
+		//Brisanje tipova
+		
+		for (int j = 0; j < allTypes.size(); j++) {
+			if (allTypes.get(j).getModule().equals(adresa)) 
+				allTypes.remove(j);
+			
+		}
+		for (int j = 0; j < allTypes.size(); j++) {
+			if (allTypes.get(j).getModule().equals(adresa)) 
+				allTypes.remove(j);
+			
+		}
+
+	}
+
+	// MASTER UPDATE TIPOVA NOVOG
 	@Override
 	@GET
 	@Path("/agents/classes")
@@ -256,7 +288,7 @@ public class AcAcControllerImpl implements AcAcController {
 		return null;
 	}
 
-	//MASTER UPDATE POKRENUTIH NOVOGA
+	// MASTER UPDATE POKRENUTIH NOVOGA
 	@Override
 	@POST
 	@Path("/agents/running")
@@ -268,9 +300,9 @@ public class AcAcControllerImpl implements AcAcController {
 
 	public void updateAllNodes(String adress) {
 		System.out.println("udjo" + adress);
-		
+
 		try {
-			URL url = new URL("http://localhost:"+ adress +"/ChatApp/rest/agents/updateCenters");
+			URL url = new URL("http://localhost:" + adress + "/ChatApp/rest/agents/updateCenters");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 			conn.setRequestMethod("POST");
@@ -304,12 +336,12 @@ public class AcAcControllerImpl implements AcAcController {
 
 		}
 	}
-	
+
 	public void updateAllTypes(String adress) {
 		System.out.println("udjo" + adress);
-		
+
 		try {
-			URL url = new URL("http://localhost:"+ adress +"/ChatApp/rest/agents/updateTypesAll");
+			URL url = new URL("http://localhost:" + adress + "/ChatApp/rest/agents/updateTypesAll");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 			conn.setRequestMethod("POST");
@@ -343,7 +375,77 @@ public class AcAcControllerImpl implements AcAcController {
 
 		}
 	}
-	
+
+	// BRISANJE CVORa
+
+	@Override
+	@DELETE
+	@Path("/node/{alias}")
+	synchronized public void deleteCenter(@PathParam("alias") String alias) {
+		// brisi i centar, i tipove i trcece agente
+		String adress = null;
+		for (int i = 0; i < allCentres.size(); i++) {
+			if (allCentres.get(i).getAlias().equals(alias)) {
+				adress = allCentres.get(i).getAdress();
+				allCentres.remove(i);
+				break;
+			}
+		}
+
+		ArrayList<AgentType> pomTypes = new ArrayList<AgentType>();
+		
+
+		for (AgentType agentType : allTypes) {
+			pomTypes.add(agentType);
+		}
+
+		System.out.println(pomTypes.size());
+		System.out.println(allTypes.size());
+		
+		if (adress != null) {
+			for (int j = 0; j < allTypes.size(); j++) {
+				if (allTypes.get(j).getModule().equals(adress)) 
+					allTypes.remove(j);
+				
+			}
+			for (int j = 0; j < allTypes.size(); j++) {
+				if (allTypes.get(j).getModule().equals(adress)) 
+					allTypes.remove(j);
+				
+			}
+		}
+
+	}
+
+	public void deleteOneCenter(String adress, String alias) {
+		try {
+
+			URL url = new URL("http://localhost:" + adress + "/ChatApp/rest/agents/node/" + alias);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("DELETE");
+			conn.setRequestProperty("Accept", "application/json");
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+			String output;
+			System.out.println("Output from Server .... \n");
+			while ((output = br.readLine()) != null) {
+				System.out.println(output);
+
+			}
+
+			conn.disconnect();
+
+		} catch (MalformedURLException e) {
+
+			e.printStackTrace();
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+		}
+	}
 
 	private ArrayList<AgentCentre> fromJson(String output, Type type) {
 		return new Gson().fromJson(output, type);
