@@ -705,59 +705,62 @@ public class AcAcControllerImpl implements AcAcController {
 
 	// HeartBeat
 
-//	@Schedule(second = "*", minute = "*/1", hour = "*", persistent = false)
-//	public void runTask1() {
-//		if (ismaster && allCentres.size() > 1) {
-//			for (int i = 1; i < allCentres.size(); i++) {
-//				String url = "http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/nodee";
-//				try {
-//
-//					URL url2 = new URL(url);
-//					HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
-//					conn.setRequestMethod("GET");
-//					conn.setRequestProperty("Accept", "application/json");
-//
-//					System.out.println("neki shit" + conn.getResponseCode());
-//
-//					if (conn.getResponseCode() == 200) {
-//						BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-//
-//						String output;
-//						System.out.println("Output from Server .... \n");
-//						while ((output = br.readLine()) != null) {
-//
-//							System.out.println(output);
-//							if (output.equals("true")) {
-//								System.out.println("if");
-//								heartbeat.put(allCentres.get(i).getAdress(), output);
-//							} else {
-//								System.out.println("els");
-//								String before = heartbeat.get(allCentres.get(i).getAdress());
-//								if (!before.equals("true"))
-//									System.out.println("mrtav");
-//							}
-//						}
-//
-//					} else {
-//
-//						System.out.println("mrtav");
-//
-//					}
-//					conn.disconnect();
-//
-//				} catch (MalformedURLException e) {
-//
-//					e.printStackTrace();
-//
-//				} catch (IOException e) {
-//
-//					e.printStackTrace();
-//
-//				}
-//
-//			}
-//		}
-//	}
+	@Schedule(minute = "1", persistent = false)
+	synchronized public void runTask1() {
+		if (ismaster && allCentres.size() > 1) {
+			for (int i = 1; i < allCentres.size(); i++) {
+				String url = "http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/nodee";
+				try {
+
+					URL url2 = new URL(url);
+					HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
+					conn.setRequestMethod("GET");
+					conn.setRequestProperty("Accept", "application/json");
+
+					System.out.println("neki shit" + conn.getResponseCode());
+
+					if (conn.getResponseCode() == 200) {
+						BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+						String output;
+						System.out.println("Output from Server .... \n");
+						while ((output = br.readLine()) != null) {
+
+							System.out.println(output);
+							if (output.equals("true")) {
+								System.out.println("if");
+								heartbeat.put(allCentres.get(i).getAdress(), output);
+							}
+						}
+
+					} else {
+						if (!heartbeat.equals(null)) {
+							String before = heartbeat.get(allCentres.get(i).getAdress());
+							if (!before.equals("true")) { // mrtav
+								for (int i1 = 0; i1 < allCentres.size(); i1++) {
+									if (!allCentres.get(i1).getAdress().equals("8080"))
+										updateAllNodes(allCentres.get(i1).getAdress());
+									updateAllTypes(allCentres.get(i).getAdress());
+								}
+								refreshRunningAgentsOnAllCentres("8080");
+							}
+						}
+					}
+					conn.disconnect();
+
+				} catch (MalformedURLException e) {
+
+					e.printStackTrace();
+
+				} catch (IOException e) {
+
+					e.printStackTrace();
+
+				}
+
+			}
+		}
+	}
 
 	private ArrayList<AgentCentre> fromJson(String output, Type type) {
 		return new Gson().fromJson(output, type);
