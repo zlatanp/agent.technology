@@ -32,6 +32,7 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import model.AID;
 import model.Agent;
 import model.AgentCentre;
 import model.AgentType;
@@ -160,7 +161,7 @@ public class AcAcControllerImpl implements AcAcController {
 
 			}
 
-		} else {
+		} else { // U SLUCAJU DA SI MASTER
 			System.out.println("Dodajem Mastera");
 			for (AgentCentre c : allCentres) {
 				if (c.getAlias().equals("MasterCenter"))
@@ -190,8 +191,10 @@ public class AcAcControllerImpl implements AcAcController {
 			System.err.println(allCentres.size());
 			if (!allCentres.get(i).getAdress().equals("8080"))
 				updateAllNodes(allCentres.get(i).getAdress());
-
+				refreshRunningAgentsOnAllCentres("8080");
 		}
+		
+		
 
 	}
 
@@ -203,7 +206,7 @@ public class AcAcControllerImpl implements AcAcController {
 		System.out.println("USPIO:" + s);
 		this.allCentres = s;
 	}
-
+	
 	@Override
 	@POST
 	@Path("/updateType")
@@ -217,8 +220,16 @@ public class AcAcControllerImpl implements AcAcController {
 			System.err.println(allCentres.size());
 			if (!allCentres.get(i).getAdress().equals("8080"))
 				updateAllTypes(allCentres.get(i).getAdress());
-
 		}
+	}
+	
+	@Override
+	@POST
+	@Path("/updateRunning")
+	@Consumes(MediaType.APPLICATION_JSON)
+	synchronized public void updateRunning(ArrayList<Agent> s) {
+		System.out.println("USPIO:" + s);
+		this.runningAgents = s;
 	}
 
 	@Override
@@ -244,6 +255,10 @@ public class AcAcControllerImpl implements AcAcController {
 		for (AgentType tip : types) {
 			System.out.println(tip.getName());
 		}
+		System.out.println("Moji trceci: " + runningAgents.size());
+		for (Agent agent : runningAgents) {
+			System.out.println(agent.getId().getName());
+		}
 
 	}
 
@@ -264,18 +279,18 @@ public class AcAcControllerImpl implements AcAcController {
 				deleteOneCenter(allCentres.get(i).getAdress(), alias);
 
 		}
-		
-		//Brisanje tipova
-		
+
+		// Brisanje tipova
+
 		for (int j = 0; j < allTypes.size(); j++) {
-			if (allTypes.get(j).getModule().equals(adresa)) 
+			if (allTypes.get(j).getModule().equals(adresa))
 				allTypes.remove(j);
-			
+
 		}
 		for (int j = 0; j < allTypes.size(); j++) {
-			if (allTypes.get(j).getModule().equals(adresa)) 
+			if (allTypes.get(j).getModule().equals(adresa))
 				allTypes.remove(j);
-			
+
 		}
 
 	}
@@ -294,6 +309,78 @@ public class AcAcControllerImpl implements AcAcController {
 	@Path("/agents/running")
 	public String getRunningAgents() {
 		return null;
+	}
+
+	// POKRETANJE NOVOG AGENTA
+
+	@Override
+	@POST
+	@Path("/running/{type}/{name}/{adress}")
+	public void newRunningAgent(@PathParam("type") String type, @PathParam("name") String name,
+			@PathParam("adress") String adress) {
+		System.out.println("Novi trci:" + type + " " + name + " " + adress);
+		Agent newAgent = new Agent();
+		AgentCentre newAC = null;
+		AgentType newType = null;
+
+		for (AgentType t : types) {
+			if (t.getName().equals(type)) {
+				newType = t;
+				adress = t.getModule();
+			}
+		}
+
+		for (AgentCentre ac : allCentres) {
+			if (ac.getAdress().equals(adress))
+				newAC = ac;
+		}
+
+		AID newAgentAid = new AID(name, newAC, newType);
+		newAgent.setId(newAgentAid);
+
+		runningAgents.add(newAgent);
+		refreshRunningAgentsOnAllCentres(adress); //Salje svima na mrezi dalje aktivne agente
+	}
+
+	public void refreshRunningAgentsOnAllCentres(String adress) { //prolazi kroz sve centre i update listu aktivnih agenata
+		for (int i = 0; i < allCentres.size(); i++) {
+			if (!allCentres.get(i).getAdress().equals(adress)) {
+				try {
+					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
+					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+					conn.setDoOutput(true);
+					conn.setRequestMethod("POST");
+					conn.setRequestProperty("Content-Type", "application/json");
+
+					String input = new Gson().toJson(runningAgents);
+
+					System.out.println("INPUT JE: " + input);
+
+					OutputStream os = conn.getOutputStream();
+					os.write(input.getBytes());
+					os.flush();
+
+					BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+					String output;
+					System.out.println("Output from Server .... \n");
+					while ((output = br.readLine()) != null) {
+						System.out.println(output);
+					}
+
+					conn.disconnect();
+
+				} catch (MalformedURLException e) {
+
+					e.printStackTrace();
+
+				} catch (IOException e) {
+
+					e.printStackTrace();
+
+				}
+			}
+		}
 	}
 
 	// nakon dolaska novog svi pozivaju
@@ -393,7 +480,6 @@ public class AcAcControllerImpl implements AcAcController {
 		}
 
 		ArrayList<AgentType> pomTypes = new ArrayList<AgentType>();
-		
 
 		for (AgentType agentType : allTypes) {
 			pomTypes.add(agentType);
@@ -401,17 +487,17 @@ public class AcAcControllerImpl implements AcAcController {
 
 		System.out.println(pomTypes.size());
 		System.out.println(allTypes.size());
-		
+
 		if (adress != null) {
 			for (int j = 0; j < allTypes.size(); j++) {
-				if (allTypes.get(j).getModule().equals(adress)) 
+				if (allTypes.get(j).getModule().equals(adress))
 					allTypes.remove(j);
-				
+
 			}
 			for (int j = 0; j < allTypes.size(); j++) {
-				if (allTypes.get(j).getModule().equals(adress)) 
+				if (allTypes.get(j).getModule().equals(adress))
 					allTypes.remove(j);
-				
+
 			}
 		}
 

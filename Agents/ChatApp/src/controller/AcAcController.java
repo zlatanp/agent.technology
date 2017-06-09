@@ -2,7 +2,9 @@ package controller;
 
 import java.util.ArrayList;
 
+import javax.ws.rs.PathParam;
 
+import model.Agent;
 import model.AgentCentre;
 import model.AgentType;
 
@@ -16,6 +18,8 @@ public interface AcAcController {
 	void bla();
 	void deleteCent();
 	void deleteCenter(String alias);
+	void newRunningAgent(String alias, String name, String adress);
+	void updateRunning(ArrayList<Agent> s);
 	String registerNewTypeOnMaster();
 	String getRunningAgents();
 }

@@ -3,7 +3,7 @@ package model;
 public class AID {
 
 	private String name;
-	private AgentCentre Host;
+	private AgentCentre host;
 	private AgentType type;
 	
 	public AID() {
@@ -13,7 +13,7 @@ public class AID {
 	public AID(String name, AgentCentre host, AgentType type) {
 		super();
 		this.name = name;
-		Host = host;
+		this.host = host;
 		this.type = type;
 	}
 
@@ -26,11 +26,11 @@ public class AID {
 	}
 
 	public AgentCentre getHost() {
-		return Host;
+		return host;
 	}
 
 	public void setHost(AgentCentre host) {
-		Host = host;
+		this.host = host;
 	}
 
 	public AgentType getType() {
