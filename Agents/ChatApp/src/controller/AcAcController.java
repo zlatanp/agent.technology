@@ -16,7 +16,7 @@ public interface AcAcController {
 	void updateTypes(ArrayList<AgentType> s);
 	void udpdateTypesAll(ArrayList<AgentType> t);
 	void bla();
-	void deleteCent();
+	void deleteCent(String adress);
 	void deleteCenter(String alias);
 	void newRunningAgent(String alias, String name, String adress);
 	void updateRunning(ArrayList<Agent> s);
