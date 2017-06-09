@@ -10,6 +10,7 @@ import model.AgentType;
 
 public interface AcAcController {
 
+	boolean active();
 	String registerNewOnMaster();
 	void addToMaster(String address, String aliasPassed);
 	void updateCenters(ArrayList<AgentCentre> s);

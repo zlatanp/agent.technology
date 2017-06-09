@@ -9,13 +9,18 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import javax.ejb.AccessTimeout;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
+import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.ejb.Timeout;
 import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -48,7 +53,8 @@ public class AcAcControllerImpl implements AcAcController {
 	private ArrayList<AgentType> types = new ArrayList<AgentType>();
 	private ArrayList<AgentType> allTypes = new ArrayList<AgentType>();
 	private ArrayList<Agent> runningAgents = new ArrayList<Agent>();
-	
+	private HashMap<String, String> heartbeat = new HashMap<String, String>();
+
 	@Context
 	ServletConfig config;
 
@@ -58,6 +64,14 @@ public class AcAcControllerImpl implements AcAcController {
 	private AgentCentre masterCenter;
 	private String myAdress;
 	private String alias = randomIdentifier();
+	private boolean ismaster = false;
+
+	@Override
+	@GET
+	@Path("/nodee")
+	synchronized public boolean active() {
+		return true;
+	}
 
 	@Override
 	@POST
@@ -73,7 +87,7 @@ public class AcAcControllerImpl implements AcAcController {
 		AgentType mapReduce = new AgentType("MapReduce", "8090");
 		AgentType contractNet = new AgentType("ContractNet", "8100");
 
-		boolean firstMaster = true; 
+		boolean firstMaster = true;
 		boolean added90 = false;
 		boolean added100 = false;
 
@@ -92,7 +106,7 @@ public class AcAcControllerImpl implements AcAcController {
 				types.add(ping);
 				types.add(mapReduce);
 				added90 = true;
-			} else if (myAdress.equals("http://localhost:8100/ChatApp/rest/") && !added100) { 
+			} else if (myAdress.equals("http://localhost:8100/ChatApp/rest/") && !added100) {
 				pong.setModule("8100");
 				types.add(pong);
 				types.add(contractNet);
@@ -166,6 +180,7 @@ public class AcAcControllerImpl implements AcAcController {
 			}
 
 		} else { // U SLUCAJU DA SI MASTER
+			ismaster = true;
 			System.out.println("Dodajem Mastera");
 			for (AgentCentre c : allCentres) {
 				if (c.getAlias().equals("MasterCenter"))
@@ -195,10 +210,8 @@ public class AcAcControllerImpl implements AcAcController {
 			System.err.println(allCentres.size());
 			if (!allCentres.get(i).getAdress().equals("8080"))
 				updateAllNodes(allCentres.get(i).getAdress());
-				refreshRunningAgentsOnAllCentres("8080");
+			refreshRunningAgentsOnAllCentres("8080");
 		}
-		
-		
 
 	}
 
@@ -210,7 +223,7 @@ public class AcAcControllerImpl implements AcAcController {
 		System.out.println("USPIO:" + s);
 		this.allCentres = s;
 	}
-	
+
 	@Override
 	@POST
 	@Path("/updateType")
@@ -226,7 +239,7 @@ public class AcAcControllerImpl implements AcAcController {
 				updateAllTypes(allCentres.get(i).getAdress());
 		}
 	}
-	
+
 	@Override
 	@POST
 	@Path("/updateRunning")
@@ -271,14 +284,14 @@ public class AcAcControllerImpl implements AcAcController {
 	@Path("/deleteMe/{adress}")
 	public void deleteCent(@PathParam("adress") String adresa) {
 
-		System.out.println("za obrisati" + adresa );
+		System.out.println("za obrisati" + adresa);
 
 		System.err.println(allCentres.size());
-		
-		//Brisanje cvora
-		
-		for(int i=0;i<allCentres.size();i++){
-			if(allCentres.get(i).getAdress().equals(adresa))
+
+		// Brisanje cvora
+
+		for (int i = 0; i < allCentres.size(); i++) {
+			if (allCentres.get(i).getAdress().equals(adresa))
 				allCentres.remove(i);
 		}
 
@@ -304,9 +317,9 @@ public class AcAcControllerImpl implements AcAcController {
 				allTypes.remove(j);
 
 		}
-		
+
 		// Brisanje agenata
-		
+
 		for (int j = 0; j < runningAgents.size(); j++) {
 			if (runningAgents.get(j).getId().getHost().getAdress().equals(adresa))
 				runningAgents.remove(j);
@@ -317,7 +330,7 @@ public class AcAcControllerImpl implements AcAcController {
 				runningAgents.remove(j);
 
 		}
-		
+
 		for (int j = 0; j < runningAgents.size(); j++) {
 			if (runningAgents.get(j).getId().getHost().getAdress().equals(adresa))
 				runningAgents.remove(j);
@@ -328,14 +341,15 @@ public class AcAcControllerImpl implements AcAcController {
 				runningAgents.remove(j);
 
 		}
-		
-		//Sad update svih
+
+		// Sad update svih
 
 		for (int i = 0; i < allCentres.size(); i++) {
 			System.out.println("ulazim u: " + allCentres.get(i).getAdress());
-			if(!allCentres.get(i).getAdress().equals(adresa)){
+			if (!allCentres.get(i).getAdress().equals(adresa)) {
 				try {
-					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateCenters");
+					URL url = new URL(
+							"http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateCenters");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -368,9 +382,10 @@ public class AcAcControllerImpl implements AcAcController {
 					e.printStackTrace();
 
 				}
-				
+
 				try {
-					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateTypesAll");
+					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress()
+							+ "/ChatApp/rest/agents/updateTypesAll");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -403,9 +418,10 @@ public class AcAcControllerImpl implements AcAcController {
 					e.printStackTrace();
 
 				}
-				
+
 				try {
-					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
+					URL url = new URL(
+							"http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -441,9 +457,7 @@ public class AcAcControllerImpl implements AcAcController {
 			}
 		}
 	}
-	
-		
-	
+
 	// MASTER UPDATE TIPOVA NOVOG
 	@Override
 	@GET
@@ -487,14 +501,22 @@ public class AcAcControllerImpl implements AcAcController {
 		newAgent.setId(newAgentAid);
 
 		runningAgents.add(newAgent);
-		refreshRunningAgentsOnAllCentres(adress); //Salje svima na mrezi dalje aktivne agente
+		refreshRunningAgentsOnAllCentres(adress); // Salje svima na mrezi dalje
+													// aktivne agente
 	}
 
-	public void refreshRunningAgentsOnAllCentres(String adress) { //prolazi kroz sve centre i update listu aktivnih agenata
+	public void refreshRunningAgentsOnAllCentres(String adress) { // prolazi
+																	// kroz sve
+																	// centre i
+																	// update
+																	// listu
+																	// aktivnih
+																	// agenata
 		for (int i = 0; i < allCentres.size(); i++) {
 			if (!allCentres.get(i).getAdress().equals(adress)) {
 				try {
-					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
+					URL url = new URL(
+							"http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -680,6 +702,62 @@ public class AcAcControllerImpl implements AcAcController {
 
 		}
 	}
+
+	// HeartBeat
+
+//	@Schedule(second = "*", minute = "*/1", hour = "*", persistent = false)
+//	public void runTask1() {
+//		if (ismaster && allCentres.size() > 1) {
+//			for (int i = 1; i < allCentres.size(); i++) {
+//				String url = "http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/nodee";
+//				try {
+//
+//					URL url2 = new URL(url);
+//					HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
+//					conn.setRequestMethod("GET");
+//					conn.setRequestProperty("Accept", "application/json");
+//
+//					System.out.println("neki shit" + conn.getResponseCode());
+//
+//					if (conn.getResponseCode() == 200) {
+//						BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+//
+//						String output;
+//						System.out.println("Output from Server .... \n");
+//						while ((output = br.readLine()) != null) {
+//
+//							System.out.println(output);
+//							if (output.equals("true")) {
+//								System.out.println("if");
+//								heartbeat.put(allCentres.get(i).getAdress(), output);
+//							} else {
+//								System.out.println("els");
+//								String before = heartbeat.get(allCentres.get(i).getAdress());
+//								if (!before.equals("true"))
+//									System.out.println("mrtav");
+//							}
+//						}
+//
+//					} else {
+//
+//						System.out.println("mrtav");
+//
+//					}
+//					conn.disconnect();
+//
+//				} catch (MalformedURLException e) {
+//
+//					e.printStackTrace();
+//
+//				} catch (IOException e) {
+//
+//					e.printStackTrace();
+//
+//				}
+//
+//			}
+//		}
+//	}
 
 	private ArrayList<AgentCentre> fromJson(String output, Type type) {
 		return new Gson().fromJson(output, type);
