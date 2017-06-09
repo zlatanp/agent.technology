@@ -67,13 +67,12 @@ public class AcAcControllerImpl implements AcAcController {
 		masterCenter.setAdress("8080");
 		masterCenter.setAlias("MasterCenter");
 		
-		AgentType ping = new AgentType("Ping", "01");
-		AgentType pong = new AgentType("Pong", "02");
-		AgentType mapReduce = new AgentType("MapReduce", "03");
-		AgentType contractNet = new AgentType("ContractNet", "04");
+		AgentType ping = new AgentType("Ping", "8080");
+		AgentType pong = new AgentType("Pong", "8080");
+		AgentType mapReduce = new AgentType("MapReduce", "8090");
+		AgentType contractNet = new AgentType("ContractNet", "8100");
 		
-		allTypes.add(ping);
-		allTypes.add(pong);
+		
 
 		boolean firstMaster = true;
 
@@ -86,6 +85,17 @@ public class AcAcControllerImpl implements AcAcController {
 
 		if (!(myAdress.equals("http://localhost:8080/ChatApp/rest/"))) {
 			System.out.println("Dodajem nemastere");
+			
+			if(myAdress.equals("http://localhost:8090/ChatApp/rest/")){
+				ping.setModule("8090");
+				types.add(ping);
+				types.add(mapReduce);
+			}else if(myAdress.equals("http://localhost:8100/ChatApp/rest/")){
+				pong.setModule("8100");
+				types.add(pong);
+				types.add(contractNet);
+			}
+			
 			String url = "http://localhost:8080/ChatApp/rest/agents/node/" + adress + "/" + alias;
 
 			try {
@@ -116,6 +126,42 @@ public class AcAcControllerImpl implements AcAcController {
 
 			}
 			
+			//Salji tip svoj na 8080
+			try {
+				URL url2 = new URL("http://localhost:8080/ChatApp/rest/agents/updateType");
+				HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
+				conn.setDoOutput(true);
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("Content-Type", "application/json");
+
+				String input = new Gson().toJson(types);
+
+				System.out.println("INPUT JE: " + input);
+
+				OutputStream os = conn.getOutputStream();
+				os.write(input.getBytes());
+				os.flush();
+
+				BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+				String output;
+				System.out.println("Output from Server .... \n");
+				while ((output = br.readLine()) != null) {
+					System.out.println(output);
+				}
+
+				conn.disconnect();
+
+			} catch (MalformedURLException e) {
+
+				e.printStackTrace();
+
+			} catch (IOException e) {
+
+				e.printStackTrace();
+
+			}
+			
 		} else {
 			System.out.println("Dodajem Mastera");
 			for (AgentCentre c : allCentres) {
@@ -126,6 +172,8 @@ public class AcAcControllerImpl implements AcAcController {
 				allCentres.add(masterCenter);
 				types.add(ping);
 				types.add(pong);
+				allTypes.add(ping);
+				allTypes.add(pong);
 			}
 		}
 
@@ -144,7 +192,7 @@ public class AcAcControllerImpl implements AcAcController {
 			System.err.println(allCentres.size());
 			if(!allCentres.get(i).getAdress().equals("8080"))
 				updateAllNodes(allCentres.get(i).getAdress());
-				updateType(allCentres.get(i).getAdress());
+				
 		}
 
 	}
@@ -164,17 +212,24 @@ public class AcAcControllerImpl implements AcAcController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	synchronized public void updateTypes(ArrayList<AgentType> s) {
 		System.out.println("TYPES:" + s);
-		boolean isnew = true;
-		int i;
-		for (AgentType t : s) {
-			for(i=0;i<types.size();i++){
-				if(t.getName().equals(types.get(i).getName()))
-					isnew = false;
-			}
-			if(i==types.size()-1 && isnew)
-				types.add(t);
-			isnew = true;
+		for (AgentType e : s) {
+			allTypes.add(e);
 		}
+		for (int i = 0; i < allCentres.size(); i++) {
+			System.err.println(allCentres.size());
+			if(!allCentres.get(i).getAdress().equals("8080"))
+				updateAllTypes(allCentres.get(i).getAdress());
+				
+		}
+	}
+	
+	@Override
+	@POST
+	@Path("/updateTypesAll")
+	@Consumes(MediaType.APPLICATION_JSON)
+	synchronized public void udpdateTypesAll(ArrayList<AgentType> t) {
+		System.out.println("USPIO:" + t);
+		this.allTypes = t;
 	}
 
 	//Test liste
@@ -183,7 +238,12 @@ public class AcAcControllerImpl implements AcAcController {
 	@Path("/all")
 	public void bla() {
 		System.out.println("Svi centri: " + allCentres.size());
+		System.out.println("Svi tipovi: " + allTypes.size());
 		for (AgentType tip : allTypes) {
+			System.out.println(tip.getName());
+		}
+		System.out.println("Moji tipovi: " + types.size());
+		for (AgentType tip : types) {
 			System.out.println(tip.getName());
 		}
 	}
@@ -245,25 +305,25 @@ public class AcAcControllerImpl implements AcAcController {
 		}
 	}
 	
-	public void updateType(String adress){
+	public void updateAllTypes(String adress) {
+		System.out.println("udjo" + adress);
+		
 		try {
-
-			URL url = new URL("http://localhost:"+ adress +"/ChatApp/rest/agents/updateType");
+			URL url = new URL("http://localhost:"+ adress +"/ChatApp/rest/agents/updateTypesAll");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json");
 
-			String input = new Gson().toJson(types);
+			String input = new Gson().toJson(allTypes);
 
-			//System.out.println("INPUT JE: " + input);
-			
+			System.out.println("INPUT JE: " + input);
+
 			OutputStream os = conn.getOutputStream();
 			os.write(input.getBytes());
 			os.flush();
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					(conn.getInputStream())));
+			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
 			String output;
 			System.out.println("Output from Server .... \n");
@@ -273,17 +333,17 @@ public class AcAcControllerImpl implements AcAcController {
 
 			conn.disconnect();
 
-		  } catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 
 			e.printStackTrace();
 
-		  } catch (IOException e) {
+		} catch (IOException e) {
 
 			e.printStackTrace();
 
-		 }
-		
+		}
 	}
+	
 
 	private ArrayList<AgentCentre> fromJson(String output, Type type) {
 		return new Gson().fromJson(output, type);
