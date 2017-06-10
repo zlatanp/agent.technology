@@ -487,7 +487,7 @@ public class AcAcControllerImpl implements AcAcController {
 		AgentCentre newAC = null;
 		AgentType newType = null;
 
-		for (AgentType t : types) {
+		for (AgentType t : allTypes) {
 			if (t.getName().equals(type) && t.getModule().equals(adress)) {
 				newType = t;
 			}
