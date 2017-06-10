@@ -19,8 +19,10 @@ public interface AcAcController {
 	void bla();
 	void deleteCent(String adress);
 	void deleteCenter(String alias);
-	void newRunningAgent(String alias, String name, String adress);
+	String newRunningAgent(String alias, String name, String adress);
 	void updateRunning(ArrayList<Agent> s);
+	ArrayList<AgentType> getAllTypes();
+	ArrayList<Agent> getAllRunning();
 	String registerNewTypeOnMaster();
 	String getRunningAgents();
 }

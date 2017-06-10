@@ -12,8 +12,28 @@
 <audio id="audio" src="resources/css/pop.mp3" ></audio>
 
 <div id="srednji">
-	<h1>Welcome to chatapp</h1>
+	<h1>Welcome to agents</h1>
 	<p></p>
+	<table>
+		<tr><td width="500px">
+	<button onclick="return dajTipove()">Get All Types of Agents</button>
+	<br>
+	<button onclick="return dajPokrenute()">Get All Running Agents</button>
+	<br>
+	<p>Select type of agent</p>
+	<select id="selektTip">
+		<option value="1">1</option>
+	</select>
+	<p>Enter name for agent: <input id="newAgentName" type="text"></input></p>
+	<br>
+	<button onclick="return runNewAgent()">Run New Agent</button>
+		</td>
+		<td><div id="kontejner" style="overflow-y: scroll; height:350px; width:200px; background-color: white;">
+		</div>
+		</td>
+		</tr>
+	 </table>
+	<!-- <p></p>
 	<a href="#" id="logoutlink">LogOut</a>
 		
 	<div id="registerDiv">
@@ -62,10 +82,148 @@
 			<input type="button" id="send" value="send" />
 			<p></p>
 
-		</div>
+		</div>-->
 	
-	</div>
+	</div> 
 	<script>
+	$(document).ready(function() {
+		 inicijalizuj();
+		 refresTipSelect();
+		});
+		
+
+	function inicijalizuj(){
+
+		
+		$.ajax({ 
+	        type: 'POST',
+	        url: 'rest/agents/node',
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        }
+	        
+		});
+		
+	};
+
+	function refresTipSelect(){
+
+		var lista = new Array();
+		var imaga = false;
+		
+		$("#selektTip").html("");
+		$.ajax({ 
+	        type: 'GET',
+	        url: 'rest/agents/dajSveTipove',
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        	if(data.length >0){
+					for(var i=0;i<data.length;i++){
+						imaga = false;
+						for(var j=0; j<lista.length; j++){
+							if(lista[j] == data[i].name)
+								imaga = true;
+						}
+
+						if(!imaga){
+							$("#selektTip").append("<option value="+data[i].name+">"+ data[i].name +"</option>");
+							lista.push(data[i].name);
+							
+						}
+					}
+			    }
+	        }
+	        
+		});
+	}
+
+	function dajTipove(){
+		var lista = new Array();
+		var imaga = false;
+		
+		$("#kontejner").html("");
+		$("#kontejner").append("<p>All types: </p>");
+		$.ajax({ 
+	        type: 'GET',
+	        url: 'rest/agents/dajSveTipove',
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        	if(data.length >0){
+					for(var i=0;i<data.length;i++){
+						imaga = false;
+						for(var j=0; j<lista.length; j++){
+							if(lista[j] == data[i].name)
+								imaga = true;
+						}
+
+						if(!imaga){
+							$("#kontejner").append("<p>"+ data[i].name +"</p>");
+							lista.push(data[i].name);
+							
+						}
+						
+					}
+			    }
+	        }
+	        
+		});
+		refresTipSelect();
+	}
+
+	function dajPokrenute(){
+		$("#kontejner").html("");
+		$("#kontejner").append("<p>Running agents: </p>");
+		$.ajax({ 
+	        type: 'GET',
+	        url: 'rest/agents/dajSveRunning',
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        	if(data.length >0){
+					for(var i=0;i<data.length;i++){
+						var pom = data[i].id;
+						var type = pom.type;
+						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"</p>");
+					}
+			    } 
+	        }
+	        
+		});
+	}
+	
+
+	function runNewAgent(){
+		var tip = $("#selektTip").val();
+		var name = $("#newAgentName").val();
+		var fulladress = window.location.href;
+		var adr = fulladress.split(":");
+		var adress = adr[2].split("/");
+		var adres = adress[0];
+
+		if(!tip || tip.length === 0 || !name || name.length === 0){
+			alert("Type or Name can not be empty!");
+			return false;
+		}
+
+		$.ajax({ 
+	        type: 'POST',
+	        url: 'rest/agents/running/'+tip+'/'+name + '/' + adres,
+	        dataType: 'json',
+	        complete: function(data){
+	        	if(data.responseText == "err"){
+		        	alert("Agent sa ovim imenom vec postoji!")
+		        }else{
+					alert("New agent added!");
+				}
+	        }
+		});
+
+	}
+
+	//aaaaaaaaaaaaaaaaaaaa
 	var usernamee;
 	var specific;
 	
@@ -152,9 +310,9 @@ function login(){
 	return false;
 }
 	
-$(document).ready(function() {
+/* $(document).ready(function() {
 	 ready();
-	});
+	}); */
 	
 function ready(){
 	init();
@@ -170,8 +328,8 @@ function ready(){
 
 function init(){
 	$.ajax({ 
-        type: 'GET',
-        url: 'rest/userChatController/init',
+        type: 'POST',
+        url: 'rest/agents/node',
         dataType: 'json',
         success: function(data){
         	console.log(data);
@@ -180,10 +338,10 @@ function init(){
 	});
 };
 
-function play(){
+/* function play(){
     var audio = document.getElementById("audio");
     audio.play();
-    }
+    } */
 
 
 $('#lpassword').keypress(function(event) {
