@@ -30,17 +30,27 @@
 					<button onclick="return runNewAgent()">Run New Agent</button>
 				</td>
 				<td><div id="kontejner"
-						style="overflow-y: scroll; height: 350px; width: 200px; background-color: white;">
+						style="overflow-y: scroll; height: 350px; width: 300px; background-color: white;">
 					</div></td>
 			</tr>
 		</table>
 	</div>
 
 	<script>
+	var atresa;
+	
 	$(document).ready(function() {
 		 inicijalizuj();
 		 //refresTipSelect();
 		 whenLogged();
+
+		 var tip = $("#selektTip").val();
+		 var name = $("#newAgentName").val();
+		 var fulladress = window.location.href;
+		 var adr = fulladress.split(":");
+		 var adress = adr[2].split("/");
+		 atresa = adress[0];
+
 		});
 		
 
@@ -140,7 +150,7 @@
 					for(var i=0;i<data.length;i++){
 						var pom = data[i].id;
 						var type = pom.type;
-						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"</p>");
+						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"&nbsp;&nbsp;<button onclick='stopAgent(\"" + pom.name + "\")'>Stop</button></p>");
 					}
 			    } 
 	        }
@@ -149,7 +159,20 @@
 	}
 
 	
-	
+	function stopAgent(agentName){
+		$.ajax({ 
+	        type: 'POST',
+	        url: 'rest/agents/running/'+agentName+'/'+atresa,
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        	
+			     
+	        }
+	        
+		});
+		dajPokrenute();
+	}
 
 	function runNewAgent(){
 		var tip = $("#selektTip").val();
@@ -173,6 +196,7 @@
 		        	alert("Agent sa ovim imenom vec postoji!")
 		        }else{
 					alert("New agent added!");
+					dajPokrenute();
 				}
 	        }
 		});
@@ -301,7 +325,7 @@
 
 		}//End else
 	};
-
+	
 
 </script>
 </body>

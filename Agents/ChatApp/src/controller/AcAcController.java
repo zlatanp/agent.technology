@@ -24,5 +24,5 @@ public interface AcAcController {
 	ArrayList<AgentType> getAllTypes();
 	ArrayList<Agent> getAllRunning();
 	String registerNewTypeOnMaster();
-	String getRunningAgents();
+	String getRunningAgents(String name, String adress);
 }

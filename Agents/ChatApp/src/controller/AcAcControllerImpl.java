@@ -115,7 +115,6 @@ public class AcAcControllerImpl implements AcAcController {
 
 			String url = "http://localhost:8080/ChatApp/rest/agents/node/" + adress + "/" + alias;
 
-			
 			try {
 
 				URL url2 = new URL(url);
@@ -247,7 +246,11 @@ public class AcAcControllerImpl implements AcAcController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	synchronized public void updateRunning(ArrayList<Agent> s) {
 		System.out.println("USPIO:" + s);
-		this.runningAgents = s;
+		if(s == null){
+			this.runningAgents.clear();
+		}else{
+			this.runningAgents = s;
+		}
 	}
 
 	@Override
@@ -467,14 +470,26 @@ public class AcAcControllerImpl implements AcAcController {
 		return null;
 	}
 
-	// MASTER UPDATE POKRENUTIH NOVOGA
+	// stopiranje agenta
 	@Override
 	@POST
-	@Path("/agents/running")
-	public String getRunningAgents() {
+	@Path("/running/{aid}/{adress}")
+	synchronized public String getRunningAgents(@PathParam("aid") String name, @PathParam("adress") String adress) {
+		System.out.println(name);
+		for (int i = 0; i < runningAgents.size(); i++) {
+			if (runningAgents.get(i).getId().getName().equals(name)) {
+				runningAgents.remove(i);
+				break;
+			}
+		}
+
+				
+		refreshRunningAgentsOnAllCentres(adress);
+
 		return null;
 	}
 
+	
 	// POKRETANJE NOVOG AGENTA
 
 	@Override
@@ -497,9 +512,9 @@ public class AcAcControllerImpl implements AcAcController {
 			if (ac.getAdress().equals(adress))
 				newAC = ac;
 		}
-		
+
 		for (Agent ag : runningAgents) {
-			if(ag.getId().getName().equals(name))
+			if (ag.getId().getName().equals(name))
 				return "err";
 		}
 
@@ -522,15 +537,16 @@ public class AcAcControllerImpl implements AcAcController {
 		for (int i = 0; i < allCentres.size(); i++) {
 			if (!allCentres.get(i).getAdress().equals(adress)) {
 				try {
+					String input = "";
 					URL url = new URL(
 							"http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
 					conn.setRequestProperty("Content-Type", "application/json");
-
-					String input = new Gson().toJson(runningAgents);
-
+					
+					input = new Gson().toJson(runningAgents);
+					
 					System.out.println("INPUT JE: " + input);
 
 					OutputStream os = conn.getOutputStream();
@@ -712,70 +728,72 @@ public class AcAcControllerImpl implements AcAcController {
 
 	// HeartBeat
 
-//	@Schedule(minute = "1", persistent = false)
-//	synchronized public void runTask1() {
-//		if (ismaster && allCentres.size() > 1) {
-//			for (int i = 1; i < allCentres.size(); i++) {
-//				String url = "http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/nodee";
-//				try {
-//
-//					URL url2 = new URL(url);
-//					HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
-//					conn.setRequestMethod("GET");
-//					conn.setRequestProperty("Accept", "application/json");
-//
-//					System.out.println("neki shit" + conn.getResponseCode());
-//
-//					if (conn.getResponseCode() == 200) {
-//						BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-//
-//						String output;
-//						System.out.println("Output from Server .... \n");
-//						while ((output = br.readLine()) != null) {
-//
-//							System.out.println(output);
-//							if (output.equals("true")) {
-//								System.out.println("if");
-//								heartbeat.put(allCentres.get(i).getAdress(), output);
-//							}
-//						}
-//
-//					} else {
-//						if (!heartbeat.equals(null)) {
-//							String before = heartbeat.get(allCentres.get(i).getAdress());
-//							if (!before.equals("true")) { // mrtav
-//								for (int i1 = 0; i1 < allCentres.size(); i1++) {
-//									if (!allCentres.get(i1).getAdress().equals("8080"))
-//										updateAllNodes(allCentres.get(i1).getAdress());
-//									updateAllTypes(allCentres.get(i).getAdress());
-//								}
-//								refreshRunningAgentsOnAllCentres("8080");
-//							}
-//						}
-//					}
-//					conn.disconnect();
-//
-//				} catch (MalformedURLException e) {
-//
-//					e.printStackTrace();
-//
-//				} catch (IOException e) {
-//
-//					e.printStackTrace();
-//
-//				}
-//
-//			}
-//		}
-//	}
-	
+	// @Schedule(minute = "1", persistent = false)
+	// synchronized public void runTask1() {
+	// if (ismaster && allCentres.size() > 1) {
+	// for (int i = 1; i < allCentres.size(); i++) {
+	// String url = "http://localhost:" + allCentres.get(i).getAdress() +
+	// "/ChatApp/rest/agents/nodee";
+	// try {
+	//
+	// URL url2 = new URL(url);
+	// HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
+	// conn.setRequestMethod("GET");
+	// conn.setRequestProperty("Accept", "application/json");
+	//
+	// System.out.println("neki shit" + conn.getResponseCode());
+	//
+	// if (conn.getResponseCode() == 200) {
+	// BufferedReader br = new BufferedReader(new
+	// InputStreamReader((conn.getInputStream())));
+	//
+	// String output;
+	// System.out.println("Output from Server .... \n");
+	// while ((output = br.readLine()) != null) {
+	//
+	// System.out.println(output);
+	// if (output.equals("true")) {
+	// System.out.println("if");
+	// heartbeat.put(allCentres.get(i).getAdress(), output);
+	// }
+	// }
+	//
+	// } else {
+	// if (!heartbeat.equals(null)) {
+	// String before = heartbeat.get(allCentres.get(i).getAdress());
+	// if (!before.equals("true")) { // mrtav
+	// for (int i1 = 0; i1 < allCentres.size(); i1++) {
+	// if (!allCentres.get(i1).getAdress().equals("8080"))
+	// updateAllNodes(allCentres.get(i1).getAdress());
+	// updateAllTypes(allCentres.get(i).getAdress());
+	// }
+	// refreshRunningAgentsOnAllCentres("8080");
+	// }
+	// }
+	// }
+	// conn.disconnect();
+	//
+	// } catch (MalformedURLException e) {
+	//
+	// e.printStackTrace();
+	//
+	// } catch (IOException e) {
+	//
+	// e.printStackTrace();
+	//
+	// }
+	//
+	// }
+	// }
+	// }
+
 	@GET
 	@Path("/dajSveTipove")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<AgentType> getAllTypes() {
 		return allTypes;
 	}
-	
+
 	@GET
 	@Path("/dajSveRunning")
 	@Consumes(MediaType.APPLICATION_JSON)
