@@ -9,86 +9,38 @@
 <title>Insert title here</title>
 </head>
 <body class="body">
-<audio id="audio" src="resources/css/pop.mp3" ></audio>
+	<audio id="audio" src="resources/css/pop.mp3"></audio>
 
-<div id="srednji">
-	<h1>Welcome to agents</h1>
-	<p></p>
-	<table>
-		<tr><td width="500px">
-	<button onclick="return dajTipove()">Get All Types of Agents</button>
-	<br>
-	<button onclick="return dajPokrenute()">Get All Running Agents</button>
-	<br>
-	<p>Select type of agent</p>
-	<select id="selektTip">
-		<option value="1">1</option>
-	</select>
-	<p>Enter name for agent: <input id="newAgentName" type="text"></input></p>
-	<br>
-	<button onclick="return runNewAgent()">Run New Agent</button>
-		</td>
-		<td><div id="kontejner" style="overflow-y: scroll; height:350px; width:200px; background-color: white;">
-		</div>
-		</td>
-		</tr>
-	 </table>
-	<!-- <p></p>
-	<a href="#" id="logoutlink">LogOut</a>
-		
-	<div id="registerDiv">
-	<h3>Register</h3>
-		<form action="" method="POST">
-			<p>USERNAME:</p><input type="text" id="rusername">
-			<p>PASSWORD:</p><input type="password" id="rpassword">
-			<p>REPEAT PASSWORD:</p><input type="password" id="rpasswordRepeat"> <br>
-			<br>
-			<input type="button"  id="registersubmit" value="Register" onclick="return register()">
-		</form>
-		<p>You can login <a href="#" id="loginlinkfromregister">here</a></p>
-	</div>
-	
-	<div id="logovanje">
-		<h1 id="loginerror">Error!</h1>
-		<h3>Please Log In:</h3>
-		<form action="" method="POST">
-			<p>USERNAME:</p><input type="text" id="lusername">
-			<p>PASSWORD:</p><input type="password" id="lpassword"> <br>
-			<br>
-			<input type="button" id="loginsubmit" onclick="return login()" value="Login">
-		</form>
-		<p>Or you can register <a href="#" id="registerLink">here</a></p>
-	</div>
-	
-</div>
-	
-	
-	
-	
-	<div id="kasnije">
-	<div id="ulogovanilikje"></div>
-		<h3>Chat history:</h3>
-		
-		<table border="1">
-			<tr><td><div id="chatLog" style="overflow-y: scroll; height:350px; width:500px; background-color: white;"></div></td><td><div id="listaLjudi" style="overflow-y: scroll; height:350px; width:200px; background-color: white;"><p>Loading Users.. (wait 3s).</div></td></tr>
-		
+	<div id="srednji">
+		<h1>Welcome to agents</h1>
+		<p></p>
+		<table>
+			<tr>
+				<td width="500px">
+					<button onclick="return dajTipove()">Get All Types of
+						Agents</button> <br>
+					<button onclick="return dajPokrenute()">Get All Running
+						Agents</button> <br>
+					<p>Select type of agent</p> <select id="selektTip">
+
+				</select>
+					<p>
+						Enter name for agent: <input id="newAgentName" type="text"></input>
+					</p> <br>
+					<button onclick="return runNewAgent()">Run New Agent</button>
+				</td>
+				<td><div id="kontejner"
+						style="overflow-y: scroll; height: 350px; width: 200px; background-color: white;">
+					</div></td>
+			</tr>
 		</table>
-		<br>
-		<br>
-		<div id="container">
-			<p>If you want to send message to specific user, enter username here:<input type="text" id="specificuser"/></p>
-			<label>Enter text:</label>
-			<input type="text" id="text" /> 
-			<input type="button" id="send" value="send" />
-			<p></p>
+	</div>
 
-		</div>-->
-	
-	</div> 
 	<script>
 	$(document).ready(function() {
 		 inicijalizuj();
-		 refresTipSelect();
+		 //refresTipSelect();
+		 whenLogged();
 		});
 		
 
@@ -104,6 +56,8 @@
 	        }
 	        
 		});
+
+		$("#kontejner").html("<p>Ready!</p>");
 		
 	};
 
@@ -193,6 +147,8 @@
 	        
 		});
 	}
+
+	
 	
 
 	function runNewAgent(){
@@ -223,307 +179,129 @@
 
 	}
 
-	//aaaaaaaaaaaaaaaaaaaa
-	var usernamee;
-	var specific;
-	
-	function register(){
-		var username = $("#rusername").val();
-		var password = $("#rpassword").val();
-		var rpassword = $("#rpasswordRepeat").val();
-
-		if(password !== rpassword){
-			alert("Repeated password must be same as password!");
-			return false;
-		}
 
 
-		if(password == '' || rpassword == '' || password == ''){
-			alert("All fields must be filled!");
-			return false;
-		}
+	function whenLogged(){
+		var socket;
 		
-		$.ajax({ 
-	        type: 'POST',
-	        url: 'rest/userChatController/registerUser/'+username+'/'+password + '/' + rpassword,
-	        dataType: 'json',
-	        success: function(data){
-	        	console.log(data.responseText);
-	        	ready();
-	        },
-	        complete: function(data){
-	            console.log(data.responseText);
-	            ready();
-	        }
-		});
+		function send(){
+	    	var text = $('#text').val();
+
+	    	if(text==""){
+	        	message('<p>Please enter a message');
+	        	return ;
+	    	}
+	    	
+	    	try{
+	        	socket.send(text);
+	    	} catch(exception){
+	       		message('<p>Error: ' + exception);
+	    	}
 		}
 
-	
-function login(){
-	var username = $("#lusername").val();
-	var password = $("#lpassword").val();
-	
-	if(password == '' || password == ''){
-		alert("All fields must be filled!");
-		return false;
-	}
-
-	$('#listaLjudi').html('Loading Users...');
-	
-	$.ajax({ 
-        type: 'POST',
-        url: 'rest/userChatController/loginUser/'+username+'/'+password,
-        dataType: 'json',
-        success: function(data){
-        	console.log(data.responseText);
-            var ret = data.responseText;
-            if(ret.includes("Done")){
-                usernamee = username;
-
-           	 $("#logoutlink").show();
-           	 	$("#loginerror").hide();
-            	$("#logovanje").hide();
-            	$("#kasnije").show();
-            	whenLogged();
-            	$("#ulogovanilikje").html(username);
-             }else{
-            	 $("#loginerror").show();
-             }
-        },
-        complete: function(data){
-            console.log(data.responseText);
-            var ret = data.responseText;
-            if(ret.includes("Done")){
-            	usernamee = username;
-              	 $("#logoutlink").show();
-           	 	$("#loginerror").hide();
-            	$("#logovanje").hide();
-            	$("#kasnije").show();
-            	whenLogged();
-            	$("#ulogovanilikje").html(username);
-             }else{
-            	 $("#loginerror").show();
-             }
-        }
-        
-	});
-	return false;
-}
-	
-/* $(document).ready(function() {
-	 ready();
-	}); */
-	
-function ready(){
-	init();
-	$("#logoutlink").hide();
-	$("#loginerror").hide();
-	$("#registerDiv").hide();
-	$("#kasnije").hide();
-	$("#loginerror").hide();	
- 	$("#logovanje").show();
- 	$("#lusername").val('');
-	$("#lpassword").val('');
-}
-
-function init(){
-	$.ajax({ 
-        type: 'POST',
-        url: 'rest/agents/node',
-        dataType: 'json',
-        success: function(data){
-        	console.log(data);
-        }
-        
-	});
-};
-
-/* function play(){
-    var audio = document.getElementById("audio");
-    audio.play();
-    } */
-
-
-$('#lpassword').keypress(function(event) {
-	if (event.keyCode == '13') {
-  		login();
-	}
-});	
-
-$('#rpasswordRepeat').keypress(function(event) {
-	if (event.keyCode == '13') {
-		register();
-	}
-});
-
-$('#registerLink').click(function(){
-	$("#logoutlink").hide();
-	$("#loginerror").hide();
-	$("#logovanje").hide();
-	$("#registerDiv").show();
-	$("#kasnije").hide();
-});
-
-$('#loginlinkfromregister').click(function(){
-	ready();
-});
-
-
-
-
-function addCoek(user){
-	$('#listaLjudi').append('<p>' + user + '</p>');
-}
-
-function getOn(){
-	$('#listaLjudi').html('');
-	$.ajax({ 
-        type: 'GET',
-        url: 'rest/userChatController/on',
-        dataType: 'json',
-        success: function(data){
-        	console.log(data);
-        	if(data.length>0){
-				for(var i=0; i<data.length; i++){
-					addCoek(data[i].username);
-				}
-            }
-        }
-       
-	});
-}
-
-function whenLogged(){
-	var socket;
-	function send(){
-    	var text = $('#text').val();
-
-    	if(specific.trim()){
-        	text = "$s:" + specific + ":" + text;
-
-        }
-    	
-    	if(text==""){
-        	message('<p>Please enter a message');
-        	return ;
-    	}
-    	try{
-        	text = usernamee + ": " + text
-        	socket.send(text);
-        	//message('<p>Sent: '+text);
-    	} catch(exception){
-       		message('<p>Error: ' + exception);
-    	}
-	}
-
-	function message(msg){
-		console.log(msg);
-  		$('#chatLog').append(msg+'</p>');
-	}
-
-	$('#text').keypress(function(event) {
-    	if (event.keyCode == '13') {
-    		specific = $("#specificuser").val();
-      		send();
-      		$('#text').val('');
-      		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);	
-	    }
-	});	
-
-	$('#logoutlink').click(function(){
-		$.ajax({ 
-	        type: 'GET',
-	        url: 'rest/userChatController/logoutUser/'+ usernamee,
-	        dataType: 'json',
-	        success: function(data){
-	        	console.log(dataresponseText);
-	        },
-	        complete: function(data){
-	        	ready();
-	        	
-	        }
-	        
-		});
-		try{
-			socket.send("c00d3");
-			location.reload();
-        	//message('<p>Sent: '+text);
-    	} catch(exception){
-       		message('<p>Error: ' + exception);
-    	}
-	});
-
-	$('#send').click(function(){
-		specific = $("#specificuser").val();
-		send();
-		$('#text').val('');
-  		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);
-		
-	});
-
-	function f(sok){
-		sok = null;
+		function message(msg){
+			console.log(msg);
+	  		$('#chatLog').append(msg+'</p>');
 		}
 
-	if(!("WebSocket" in window)){
-		$('#chatLog, input, button, #examples').fadeOut("fast");
-		$('<p>Oh no, you need a browser that supports WebSockets. How about <a href="http://www.google.com/chrome">Google/a>?</p>').appendTo('#container');
-	} else {
-    	var host = "ws://localhost:8080/ChatApp/websocket";
-    	try{
-        	socket = new WebSocket(host);
-        	//message('<p>connect: Socket Status: '+socket.readyState);
+		$('#text').keypress(function(event) {
+	    	if (event.keyCode == '13') {
+	    		specific = $("#specificuser").val();
+	      		send();
+	      		$('#text').val('');
+	      		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);	
+		    }
+		});	
 
-        	socket.onopen = function(){
-       	 		//message('<p>onopen: Socket Status: '+socket.readyState+' (open)');
-       	 		//addCoek(usernamee);
-       	 		//Daj sve online usere i stavi sa strane u listu
-        		//getOn();
-        		
-				socket.send("c00d3");
-        	}
+		function f(socket){
+			socket = null;
+		}
 
-       	 	socket.onmessage = function(msg){
-           	 	if(msg.data.includes("c00d3")){
-           	 		setTimeout(getOn, 3000);
-           	 	}else if(msg.data.includes("$s:")){
-               	 	var poruka = msg.data;
-               	 	var niz = poruka.split(":");
-               	 	var odkoga = niz[0];
-               	 	var zakoga = niz[2];
-               	 	var message = niz[3];
-               	 	if(zakoga === usernamee){
-               	 		$('#chatLog').append('<p>*Private: '+odkoga + ": "+ message+'</p>');
-               	 		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);
-               	 		alert(odkoga + " messaged you!");
-               	 		play();
-               	 	}
-               	 	if(odkoga === usernamee){
-               	 	$('#chatLog').append('<p>*Private: (to "'+ zakoga +'"): '+odkoga + ": "+ message+'</p>');
-           	 		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);}
-               	 	play();
-               	 		
-                }else{
-                	$('#chatLog').append('<p>'+msg.data+'</p>');
-                	$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);
-                	play();
-                }
-        	}
+// 		$('#logoutlink').click(function(){
+// 			$.ajax({ 
+// 		        type: 'GET',
+// 		        url: 'rest/userChatController/logoutUser/'+ usernamee,
+// 		        dataType: 'json',
+// 		        success: function(data){
+// 		        	console.log(dataresponseText);
+// 		        },
+// 		        complete: function(data){
+// 		        	ready();
+		        	
+// 		        }
+		        
+// 			});
+// 			try{
+// 				socket.send("c00d3");
+// 				location.reload();
+// 	        	//message('<p>Sent: '+text);
+// 	    	} catch(exception){
+// 	       		message('<p>Error: ' + exception);
+// 	    	}
+// 		});
 
-       	 	
-        	socket.onclose = function(){
-        		//message('<p>onclose: Socket Status: '+socket.readyState+' (Closed)');
-        		//socket.send("c00d3");
-        		//setTimeout(f(socket), 1000);
-        		socket = null;
-        	}			
+// 		$('#send').click(function(){
+// 			specific = $("#specificuser").val();
+// 			send();
+// 			$('#text').val('');
+// 	  		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);
+			
+// 		});
 
-    	} catch(exception){
-       		message('<p>Error'+exception);
-    	}
+		if(!("WebSocket" in window)){
+			alert("Oh no, you need a browser that supports WebSockets.");
+		} else {
+	    	var host = "ws://localhost:8080/ChatApp/websocket";
+	    	try{
+	        	socket = new WebSocket(host);
 
-	}//End else
-};
+	        	socket.onopen = function(){
+	        		
+					socket.send("c00d3");
+	        	}
+
+	       	 	socket.onmessage = function(msg){
+	           	 	if(msg.data.includes("c00d3")){
+		           	 	console.log("a");
+	           	 		setTimeout(refresTipSelect, 1000); 
+	           	 	
+	           	 	}
+// 	           	 	else if(msg.data.includes("$s:")){
+// 	               	 	var poruka = msg.data;
+// 	               	 	var niz = poruka.split(":");
+// 	               	 	var odkoga = niz[0];
+// 	               	 	var zakoga = niz[2];
+// 	               	 	var message = niz[3];
+// 	               	 	if(zakoga === usernamee){
+// 	               	 		$('#chatLog').append('<p>*Private: '+odkoga + ": "+ message+'</p>');
+// 	               	 		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);
+// 	               	 		alert(odkoga + " messaged you!");
+// 	               	 		play();
+// 	               	 	}
+// 	               	 	if(odkoga === usernamee){
+// 	               	 	$('#chatLog').append('<p>*Private: (to "'+ zakoga +'"): '+odkoga + ": "+ message+'</p>');
+// 	           	 		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);}
+// 	               	 	play();
+	               	 		
+// 	                }else{
+// 	                	$('#chatLog').append('<p>'+msg.data+'</p>');
+// 	                	$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);
+// 	                	play();
+// 	                }
+	        	}
+
+	       	 	
+	        	socket.onclose = function(){
+	        		socket = null;
+	        	}			
+
+	    	} catch(exception){
+	       		message('<p>Error'+exception);
+	    	}
+
+		}//End else
+	};
+
 
 </script>
 </body>
