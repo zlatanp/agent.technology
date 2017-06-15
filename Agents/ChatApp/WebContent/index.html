@@ -27,7 +27,7 @@
 					<p>
 						Enter name for agent: <input id="newAgentName" type="text"></input>
 					</p> <br>
-					<button onclick="return runNewAgent()">Run New Agent</button>
+					<button class="run" onclick="return runNewAgent()">Run New Agent</button>
 				</td>
 				<td><div id="kontejner"
 						style="overflow-y: scroll; height: 350px; width: 300px; background-color: white;">
@@ -38,6 +38,7 @@
 
 	<script>
 	var atresa;
+	var socket;
 	
 	$(document).ready(function() {
 		 inicijalizuj();
@@ -150,7 +151,7 @@
 					for(var i=0;i<data.length;i++){
 						var pom = data[i].id;
 						var type = pom.type;
-						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"&nbsp;&nbsp;<button onclick='stopAgent(\"" + pom.name + "\")'>Stop</button></p>");
+						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"&nbsp;&nbsp;<button class='run' onclick='stopAgent(\"" + pom.name + "\")'>Stop</button></p>");
 					}
 			    } 
 	        }
@@ -171,7 +172,7 @@
 	        }
 	        
 		});
-		dajPokrenute();
+		socket.send("c00d4");
 	}
 
 	function runNewAgent(){
@@ -197,6 +198,7 @@
 		        }else{
 					alert("New agent added!");
 					dajPokrenute();
+					$("#newAgentName").val('');
 				}
 	        }
 		});
@@ -206,7 +208,7 @@
 
 
 	function whenLogged(){
-		var socket;
+		
 		
 		function send(){
 	    	var text = $('#text').val();
@@ -236,6 +238,16 @@
 	      		$('#chatLog').animate({scrollTop: $('#chatLog').get(0).scrollHeight}, 100);	
 		    }
 		});	
+
+		$('.run').click(function(event) {
+	    	
+	      	socket.send("c00d4");
+		});
+
+		$('.delete').click(function(event) {
+	    	
+			socket.send("c00d4");
+		});
 
 		function f(socket){
 			socket = null;
@@ -288,6 +300,11 @@
 	           	 	if(msg.data.includes("c00d3")){
 		           	 	console.log("a");
 	           	 		setTimeout(refresTipSelect, 1000); 
+	           	 	
+	           	 	}else if(msg.data.includes("c00d4")){
+		           	 	console.log("be");
+	           	 		setTimeout(dajPokrenute, 1000); 
+	           	 		
 	           	 	
 	           	 	}
 // 	           	 	else if(msg.data.includes("$s:")){

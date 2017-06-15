@@ -486,7 +486,7 @@ public class AcAcControllerImpl implements AcAcController {
 				
 		refreshRunningAgentsOnAllCentres(adress);
 
-		return null;
+		return "obrisan";
 	}
 
 	
