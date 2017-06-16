@@ -39,6 +39,8 @@
 	<script>
 	var atresa;
 	var socket;
+
+
 	
 	$(document).ready(function() {
 		 inicijalizuj();
@@ -52,7 +54,24 @@
 		 var adress = adr[2].split("/");
 		 atresa = adress[0];
 
+		 if(atresa == "8080")
+			 check()
+
 		});
+
+	function check(){
+		setInterval(function() {
+			$.ajax({ 
+	        type: 'POST',
+	        url: 'rest/agents/check',
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        }
+	        
+		});
+		}, 10000);
+	}
 		
 
 	function inicijalizuj(){

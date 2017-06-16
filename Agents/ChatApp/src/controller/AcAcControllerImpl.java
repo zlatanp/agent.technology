@@ -246,9 +246,9 @@ public class AcAcControllerImpl implements AcAcController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	synchronized public void updateRunning(ArrayList<Agent> s) {
 		System.out.println("USPIO:" + s);
-		if(s == null){
+		if (s == null) {
 			this.runningAgents.clear();
-		}else{
+		} else {
 			this.runningAgents = s;
 		}
 	}
@@ -483,13 +483,11 @@ public class AcAcControllerImpl implements AcAcController {
 			}
 		}
 
-				
 		refreshRunningAgentsOnAllCentres(adress);
 
 		return "obrisan";
 	}
 
-	
 	// POKRETANJE NOVOG AGENTA
 
 	@Override
@@ -544,9 +542,9 @@ public class AcAcControllerImpl implements AcAcController {
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
 					conn.setRequestProperty("Content-Type", "application/json");
-					
+
 					input = new Gson().toJson(runningAgents);
-					
+
 					System.out.println("INPUT JE: " + input);
 
 					OutputStream os = conn.getOutputStream();
@@ -728,64 +726,67 @@ public class AcAcControllerImpl implements AcAcController {
 
 	// HeartBeat
 
-	// @Schedule(minute = "1", persistent = false)
-	// synchronized public void runTask1() {
-	// if (ismaster && allCentres.size() > 1) {
-	// for (int i = 1; i < allCentres.size(); i++) {
-	// String url = "http://localhost:" + allCentres.get(i).getAdress() +
-	// "/ChatApp/rest/agents/nodee";
-	// try {
-	//
-	// URL url2 = new URL(url);
-	// HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
-	// conn.setRequestMethod("GET");
-	// conn.setRequestProperty("Accept", "application/json");
-	//
-	// System.out.println("neki shit" + conn.getResponseCode());
-	//
-	// if (conn.getResponseCode() == 200) {
-	// BufferedReader br = new BufferedReader(new
-	// InputStreamReader((conn.getInputStream())));
-	//
-	// String output;
-	// System.out.println("Output from Server .... \n");
-	// while ((output = br.readLine()) != null) {
-	//
-	// System.out.println(output);
-	// if (output.equals("true")) {
-	// System.out.println("if");
-	// heartbeat.put(allCentres.get(i).getAdress(), output);
-	// }
-	// }
-	//
-	// } else {
-	// if (!heartbeat.equals(null)) {
-	// String before = heartbeat.get(allCentres.get(i).getAdress());
-	// if (!before.equals("true")) { // mrtav
-	// for (int i1 = 0; i1 < allCentres.size(); i1++) {
-	// if (!allCentres.get(i1).getAdress().equals("8080"))
-	// updateAllNodes(allCentres.get(i1).getAdress());
-	// updateAllTypes(allCentres.get(i).getAdress());
-	// }
-	// refreshRunningAgentsOnAllCentres("8080");
-	// }
-	// }
-	// }
-	// conn.disconnect();
-	//
-	// } catch (MalformedURLException e) {
-	//
-	// e.printStackTrace();
-	//
-	// } catch (IOException e) {
-	//
-	// e.printStackTrace();
-	//
-	// }
-	//
-	// }
-	// }
-	// }
+	//@Schedule(minute = "1", persistent = false)
+	@Override
+	@POST
+	@Path("/check")
+	synchronized public void runTask1() {
+		if (allCentres.size() > 1) {
+			int i;
+			for (i = 1; i < allCentres.size(); i++) {
+				String url = "http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/nodee";
+				try {
+
+					URL url2 = new URL(url);
+					HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
+					conn.setRequestMethod("GET");
+					conn.setRequestProperty("Accept", "application/json");
+					
+					//System.out.println("neki shit" + conn.getResponseCode());
+					int resp = conn.getResponseCode();
+					
+					if (resp == 200) {
+						
+						BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+						String output;
+						System.out.println("Output from Server .... \n");
+						while ((output = br.readLine()) != null) {
+
+							System.out.println(output);
+							if (output.equals("true")) {
+								System.out.println("if");
+								heartbeat.put(allCentres.get(i).getAdress(), "true");
+							}
+						}
+
+					} else {
+							
+						
+					}
+					conn.disconnect();
+
+				} catch (MalformedURLException e) {
+
+					System.out.println("m");
+
+				} catch (IOException e) {
+
+					System.out.println("e");
+					String adresa = allCentres.get(i).getAdress();
+					String before = heartbeat.get(allCentres.get(i).getAdress());
+					if (!before.equals("true")) { // mrtav
+						
+						deleteCent(adresa);
+					}else{
+						heartbeat.put(allCentres.get(i).getAdress(), "false");
+					}
+
+				}
+
+			}
+		}
+	}
 
 	@GET
 	@Path("/dajSveTipove")
@@ -799,6 +800,19 @@ public class AcAcControllerImpl implements AcAcController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<Agent> getAllRunning() {
 		return runningAgents;
+	}
+
+	@Override
+	@GET
+	@Path("/dajSveCentre")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ArrayList<AgentCentre> getAllCentres() {
+		return allCentres;
+	}
+
+	public void setAllCentres(ArrayList<AgentCentre> allCentres) {
+		this.allCentres = allCentres;
 	}
 
 	private ArrayList<AgentCentre> fromJson(String output, Type type) {
