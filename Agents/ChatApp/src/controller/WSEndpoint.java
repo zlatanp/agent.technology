@@ -63,6 +63,19 @@ public class WSEndpoint {
 				// }
 			}
 		}
+		
+		if (message.equals("c00d5")){
+			for (Session s : peers) {
+				// if(!session2.getId().equals(session.getId())){
+				RemoteEndpoint.Basic other = s.getBasicRemote();
+				try {
+					other.sendText(message);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				// }
+			}
+		}
 
 		return "";
 	}

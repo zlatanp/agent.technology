@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.ejb.AccessTimeout;
+import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Schedule;
@@ -65,6 +66,9 @@ public class AcAcControllerImpl implements AcAcController {
 	private String myAdress;
 	private String alias = randomIdentifier();
 	private boolean ismaster = false;
+	
+	@EJB
+	private WSEndpoint ws;
 
 	@Override
 	@GET
@@ -730,7 +734,7 @@ public class AcAcControllerImpl implements AcAcController {
 	@Override
 	@POST
 	@Path("/check")
-	synchronized public void runTask1() {
+	synchronized public String runTask1() {
 		if (allCentres.size() > 1) {
 			int i;
 			for (i = 1; i < allCentres.size(); i++) {
@@ -759,16 +763,15 @@ public class AcAcControllerImpl implements AcAcController {
 								heartbeat.put(allCentres.get(i).getAdress(), "true");
 							}
 						}
-
-					} else {
-							
 						
 					}
 					conn.disconnect();
+					return "ok";
 
 				} catch (MalformedURLException e) {
 
 					System.out.println("m");
+					return "ok";
 
 				} catch (IOException e) {
 
@@ -778,14 +781,17 @@ public class AcAcControllerImpl implements AcAcController {
 					if (!before.equals("true")) { // mrtav
 						
 						deleteCent(adresa);
+						return "ws";
 					}else{
 						heartbeat.put(allCentres.get(i).getAdress(), "false");
+						return "oks";
 					}
 
 				}
 
 			}
 		}
+		return "ok";
 	}
 
 	@GET

@@ -67,10 +67,18 @@
 	        dataType: 'json',
 	        success: function(data){
 	        	console.log(data);
-	        }
+	        },
+	        complete: function(data){
+	        	if(data.responseText == "oks")
+	        		setTimeout(wsbrisi, 11000);
+			}
 	        
 		});
 		}, 10000);
+	}
+
+	function wsbrisi(){
+		socket.send("c00d5");
 	}
 		
 
@@ -322,6 +330,12 @@
 	           	 	
 	           	 	}else if(msg.data.includes("c00d4")){
 		           	 	console.log("be");
+	           	 		setTimeout(dajPokrenute, 1000); 
+	           	 		
+	           	 	
+	           	 	}else if(msg.data.includes("c00d5")){
+		           	 	console.log("be");
+		           	 	setTimeout(refresTipSelect, 1000);
 	           	 		setTimeout(dajPokrenute, 1000); 
 	           	 		
 	           	 	
