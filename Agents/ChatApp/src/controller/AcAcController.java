@@ -27,4 +27,6 @@ public interface AcAcController {
 	String getRunningAgents(String name, String adress);
 	ArrayList<AgentCentre> getAllCentres();
 	String runTask1();
+	void SendMessage(String poruka, String name);
+	void receiveMessage(String poruka);
 }

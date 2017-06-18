@@ -5,6 +5,9 @@
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script src="resources/js/jquery-1.11.0.js"></script>
+<script src="http://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="resources/css/mystyle.css">
 <title>Insert title here</title>
 </head>
@@ -30,11 +33,19 @@
 					<button class="run" onclick="return runNewAgent()">Run New Agent</button>
 				</td>
 				<td><div id="kontejner"
-						style="overflow-y: scroll; height: 350px; width: 300px; background-color: white;">
+						style="overflow-y: scroll; height: 350px; width: 450px; background-color: white;">
 					</div></td>
 			</tr>
 		</table>
 	</div>
+	
+	<div id="dialog" title="Enter message">
+	<input name="agent" type="text" id="agent" hidden="true">
+        <input name="message" type="text" id="message">
+        <br>
+        <br>
+        <button onclick="return sendMessage()" id="dialogAdd">Send!</button>
+    </div>
 
 	<script>
 	var atresa;
@@ -56,6 +67,21 @@
 
 		 if(atresa == "8080")
 			 check()
+
+			 $( function() {
+			       $("#dialog").dialog({
+			            autoOpen: false,
+			            show: {
+			                effect: "blind",
+			                duration: 500
+			                },
+			            hide: {
+			                effect: "explode",
+			                duration: 500
+			                }
+			       });
+
+			   });
 
 		});
 
@@ -178,12 +204,37 @@
 					for(var i=0;i<data.length;i++){
 						var pom = data[i].id;
 						var type = pom.type;
-						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"&nbsp;&nbsp;<button class='run' onclick='stopAgent(\"" + pom.name + "\")'>Stop</button></p>");
+						$("#kontejner").append("<p>Name: "+ pom.name +", Type: "+ type.name +"&nbsp;&nbsp;<button onclick='openDialog(\"" + pom.name + "\")'>Send Message</button><button class='run' onclick='stopAgent(\"" + pom.name + "\")'>Stop</button></p>");
 					}
 			    } 
 	        }
 	        
 		});
+	}
+
+	function openDialog(agentName){
+		$("#dialog").dialog("open");
+		$("#agent").val(agentName);
+	}
+
+	function sendMessage(){
+		var poruka = $("#message").val();
+		var agentName = $("#agent").val();
+		$("#dialog").dialog("close");
+
+		$.ajax({ 
+	        type: 'GET',
+	        url: 'rest/agents/sendMessage/'+ poruka + '/' + agentName,
+	        dataType: 'json',
+	        success: function(data){
+	        	console.log(data);
+	        	
+	        }
+	        
+		});
+
+		alert(poruka);
+		alert(agentName);
 	}
 
 	

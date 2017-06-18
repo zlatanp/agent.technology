@@ -38,6 +38,7 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import jms.touser.MessageToUserImpl;
 import model.AID;
 import model.Agent;
 import model.AgentCentre;
@@ -824,6 +825,8 @@ public class AcAcControllerImpl implements AcAcController {
 	private ArrayList<AgentCentre> fromJson(String output, Type type) {
 		return new Gson().fromJson(output, type);
 	}
+	
+	
 
 	// Generate random Alias for non-master chat app
 
@@ -847,6 +850,28 @@ public class AcAcControllerImpl implements AcAcController {
 			}
 		}
 		return builder.toString();
+	}
+
+	@Override
+	@GET
+	@Path("/sendMessage/{poruka}/{name}")
+	public void SendMessage(@PathParam("poruka") String poruka, @PathParam("name") String name) {
+		System.out.println(poruka + name);
+		//SAD JMSOM Salji to na onog govnara
+		
+		MessageToUserImpl m = new MessageToUserImpl();
+		//System.out.println("saljem");
+		m.registerMessage(poruka, name);
+		
+	}
+
+	@Override
+	@POST
+	@Path("/receive")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void receiveMessage(String poruka) {
+		System.out.println("Na kontroleru " +poruka);
+		
 	}
 
 }
