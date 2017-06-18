@@ -29,4 +29,5 @@ public interface AcAcController {
 	String runTask1();
 	void SendMessage(String poruka, String name);
 	void receiveMessage(String poruka);
+	String getOutput();
 }

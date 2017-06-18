@@ -56,7 +56,7 @@ public class AcAcControllerImpl implements AcAcController {
 	private ArrayList<AgentType> allTypes = new ArrayList<AgentType>();
 	private ArrayList<Agent> runningAgents = new ArrayList<Agent>();
 	private HashMap<String, String> heartbeat = new HashMap<String, String>();
-
+	private String output = "Output:%";
 	@Context
 	ServletConfig config;
 
@@ -67,6 +67,7 @@ public class AcAcControllerImpl implements AcAcController {
 	private String myAdress;
 	private String alias = randomIdentifier();
 	private boolean ismaster = false;
+	private boolean promenio = false;
 	
 	@EJB
 	private WSEndpoint ws;
@@ -870,8 +871,25 @@ public class AcAcControllerImpl implements AcAcController {
 	@Path("/receive")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void receiveMessage(String poruka) {
-		System.out.println("Na kontroleru " +poruka);
 		
+		output += poruka + "%";
+		promenio = true;
+		System.out.println(output);
 	}
+
+	@Override
+	@GET
+	@Path("/output")
+	public String getOutput() {
+		if(!promenio){
+			return null;
+		}else{
+			promenio = false;
+
+			return output;
+		}
+	}
+	
+	
 
 }
