@@ -92,58 +92,58 @@ public class WSEndpoint {
 		System.out.println("CLOSE");
 		LOG.info("Connection closed ...");
 
-//		if (delete && i>0) {
-//			try {
-//
-//				URL url1 = new URL("http://localhost:8080/ChatApp/rest/agents/deleteMe/8100");
-//				URL url2 = new URL("http://localhost:8080/ChatApp/rest/agents/deleteMe/8090");
-//				
-//				if(i==2){
-//					conn = (HttpURLConnection) url1.openConnection();
-//					i--;
-//				}else{
-//					conn = (HttpURLConnection) url2.openConnection();
-//					i--;
-//				}
-//				
-//				conn.setRequestMethod("GET");
-//				conn.setRequestProperty("Accept", "application/json");
-//
-//				BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-//
-//				String output;
-//				System.out.println("Output from Server .... \n");
-//				while ((output = br.readLine()) != null) {
-//					System.out.println(output);
-//
-//				}
-//
-//				conn.disconnect();
-//
-//			} catch (MalformedURLException e) {
-//
-//				e.printStackTrace();
-//
-//			} catch (IOException e) {
-//
-//				e.printStackTrace();
-//
-//			}
-//
-//			peers.remove(peer);
-//
-//			for (Session session2 : peers) {
-//				// if(!session2.getId().equals(session.getId())){
-//				RemoteEndpoint.Basic other = session2.getBasicRemote();
-//				try {
-//					other.sendText("c00d3");
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//
-//			}
-//
-//		}
+		if (delete && i>0) {
+			try {
+
+				URL url1 = new URL("http://localhost:8080/ChatApp/rest/agents/deleteMe/8100");
+				URL url2 = new URL("http://localhost:8080/ChatApp/rest/agents/deleteMe/8090");
+				
+				if(i==2){
+					conn = (HttpURLConnection) url1.openConnection();
+					i--;
+				}else{
+					conn = (HttpURLConnection) url2.openConnection();
+					i--;
+				}
+				
+				conn.setRequestMethod("GET");
+				conn.setRequestProperty("Accept", "application/json");
+
+				BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+				String output;
+				System.out.println("Output from Server .... \n");
+				while ((output = br.readLine()) != null) {
+					System.out.println(output);
+
+				}
+
+				conn.disconnect();
+
+			} catch (MalformedURLException e) {
+
+				e.printStackTrace();
+
+			} catch (IOException e) {
+
+				e.printStackTrace();
+
+			}
+
+			peers.remove(peer);
+
+			for (Session session2 : peers) {
+				// if(!session2.getId().equals(session.getId())){
+				RemoteEndpoint.Basic other = session2.getBasicRemote();
+				try {
+					other.sendText("c00d3");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+
+		}
 	}
 
 }

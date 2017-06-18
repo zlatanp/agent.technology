@@ -90,7 +90,7 @@ public class MDBConsumer implements MessageListener {
 			}
 
 			if (type.equals("Pong"))
-				res = name + ": No message";
+				res = name + ": No message\n";
 
 			if (type.equals("Ping")) {
 				boolean pong = false;
@@ -103,9 +103,9 @@ public class MDBConsumer implements MessageListener {
 				}
 
 				if (pong) {
-					res = pongname + ": Pong";
+					res = pongname + ": Pong\n";
 				} else {
-					res = name + ": Ping";
+					res = name + ": Ping\n";
 				}
 			}
 			
@@ -118,11 +118,11 @@ public class MDBConsumer implements MessageListener {
 		            } else
 		                freqList.put(key, 1);
 		        }
-				res = name + ":" + System.lineSeparator();
+				res = name + ":\n";
 				for (Map.Entry<Character, Integer> entry : freqList.entrySet())
 				{
 				    System.out.println(entry.getKey() + ":" + entry.getValue());
-				    res += entry.getKey() + ":" + entry.getValue() + System.lineSeparator();
+				    res += entry.getKey() + ":" + entry.getValue() + "\n";
 				}
 			}
 			

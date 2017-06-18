@@ -45,7 +45,7 @@
 				<td>
 					<div id="izzlaz"
 						style="overflow-y: scroll; height: 200px; background-color: white;">
-						<p>Output</p>
+						<p>Output:</p>
 					</div>
 					
 				</td>
@@ -131,7 +131,8 @@
 		        	console.log(data.responseText);
 		        	var text = data.responseText;
 		        	if(text.length > 0){
-			        	var planeText = text.replace(/%/g, "<br>");
+			        	var pom = text.replace(/["']/g, "");
+			        	var planeText = pom.replace(/\\n/g, "<br>");
 			        	$("#izzlaz").html(planeText);
 		        	}
 			    }
@@ -421,7 +422,7 @@
 	           	 	}else if(msg.data.includes("c00d5")){
 		           	 	console.log("be");
 		           	 	setTimeout(refresTipSelect, 1000);
-	           	 		setTimeout(dajPokrenute, 1000); 
+	           	 		setTimeout(dajPokrenute, 2000); 
 	           	 		
 	           	 	
 	           	 	}

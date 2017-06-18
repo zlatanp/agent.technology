@@ -56,7 +56,7 @@ public class AcAcControllerImpl implements AcAcController {
 	private ArrayList<AgentType> allTypes = new ArrayList<AgentType>();
 	private ArrayList<Agent> runningAgents = new ArrayList<Agent>();
 	private HashMap<String, String> heartbeat = new HashMap<String, String>();
-	private String output = "Output:%";
+	private String output = "Output:\n";
 	@Context
 	ServletConfig config;
 
@@ -306,11 +306,15 @@ public class AcAcControllerImpl implements AcAcController {
 		}
 
 		// Brisanje tipova
+		
+		String tip = "";
 
 		for (int j = 0; j < allTypes.size(); j++) {
-			if (allTypes.get(j).getModule().equals(adresa))
+			if (allTypes.get(j).getModule().equals(adresa)){
+				tip = allTypes.get(j).getName();
 				allTypes.remove(j);
-
+				System.out.println("brisem tip: " + tip);
+			}
 		}
 		for (int j = 0; j < allTypes.size(); j++) {
 			if (allTypes.get(j).getModule().equals(adresa))
@@ -505,15 +509,17 @@ public class AcAcControllerImpl implements AcAcController {
 		Agent newAgent = new Agent();
 		AgentCentre newAC = null;
 		AgentType newType = null;
+		String atresa = "";
 
 		for (AgentType t : allTypes) {
 			if (t.getName().equals(type)) {
 				newType = t;
+				atresa = t.getModule();
 			}
 		}
 
 		for (AgentCentre ac : allCentres) {
-			if (ac.getAdress().equals(adress))
+			if (ac.getAdress().equals(atresa))
 				newAC = ac;
 		}
 
@@ -872,7 +878,7 @@ public class AcAcControllerImpl implements AcAcController {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void receiveMessage(String poruka) {
 		
-		output += poruka + "%";
+		output += poruka + "\n";
 		promenio = true;
 		System.out.println(output);
 	}
