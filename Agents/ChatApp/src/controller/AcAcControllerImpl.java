@@ -38,7 +38,7 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import jms.touser.MessageToUserImpl;
+import jms.touser.MessageToConsumerImpl;
 import model.AID;
 import model.Agent;
 import model.AgentCentre;
@@ -861,14 +861,14 @@ public class AcAcControllerImpl implements AcAcController {
 
 	@Override
 	@GET
-	@Path("/sendMessage/{poruka}/{name}")
-	public void SendMessage(@PathParam("poruka") String poruka, @PathParam("name") String name) {
-		System.out.println(poruka + name);
-		//SAD JMSOM Salji to na onog govnara
+	@Path("/sendMessage/{poruka}/{name}/{adresa}")
+	public void SendMessage(@PathParam("poruka") String poruka, @PathParam("name") String name, @PathParam("adresa") String adresa) {
+		System.out.println(poruka + name + adresa);
+		//SAD JMSOM Salji to na onog 
 		
-		MessageToUserImpl m = new MessageToUserImpl();
+		MessageToConsumerImpl m = new MessageToConsumerImpl();
 		//System.out.println("saljem");
-		m.registerMessage(poruka, name);
+		m.sendMessageToAgent(poruka, name, adresa);
 		
 	}
 
@@ -881,6 +881,7 @@ public class AcAcControllerImpl implements AcAcController {
 		output += poruka + "\n";
 		promenio = true;
 		System.out.println(output);
+		
 	}
 
 	@Override

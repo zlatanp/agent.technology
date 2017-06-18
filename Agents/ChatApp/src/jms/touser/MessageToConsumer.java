@@ -5,9 +5,9 @@ import javax.ejb.Local;
 import model.User;
 
 @Local
-public interface MessageToUser {
+public interface MessageToConsumer {
 	
-	public void registerMessage(String username, String password);
+	public void sendMessageToAgent(String username, String password, String adresa);
     public void loginMessage(String username, String password);
     public void logoutMessage(String username);
     public void getRegisteredUsers();

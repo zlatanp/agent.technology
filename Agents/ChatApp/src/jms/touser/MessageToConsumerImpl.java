@@ -24,8 +24,8 @@ import jms.UserMessage;
 import model.User;
 
 @Stateless
-@Local(MessageToUser.class)
-public class MessageToUserImpl implements MessageToUser {
+@Local(MessageToConsumer.class)
+public class MessageToConsumerImpl implements MessageToConsumer {
 
 
 
@@ -40,7 +40,7 @@ public class MessageToUserImpl implements MessageToUser {
 	private QueueSession session;
 
 	@Override
-	public void registerMessage(String username, String password) {
+	public void sendMessageToAgent(String username, String password, String adresa) {
 		try {
 			initialise();
 		} catch (NamingException e1) {
@@ -49,7 +49,7 @@ public class MessageToUserImpl implements MessageToUser {
 		}
 		try {
 
-			TextMessage msg = session.createTextMessage(username + "=" + password);
+			TextMessage msg = session.createTextMessage(username + "=" + password + "=" + adresa);
 			sender.send(msg);
 
 			destroy();

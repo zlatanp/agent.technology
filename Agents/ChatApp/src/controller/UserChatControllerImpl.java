@@ -37,7 +37,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import exceptions.AliasExistsException;
-import jms.touser.MessageToUserImpl;
+import jms.touser.MessageToConsumerImpl;
 import model.Agent;
 import model.AgentCentre;
 import model.AgentType;
@@ -338,9 +338,9 @@ public class UserChatControllerImpl implements UserChatController {
 				//jms queue jer su na istom portu...
 				
 				
-				MessageToUserImpl m = new MessageToUserImpl();
+				MessageToConsumerImpl m = new MessageToConsumerImpl();
 				//System.out.println("saljem");
-				m.registerMessage(username, password);
+				//m.registerMessage(username, password);
 				
 				return "JMS REGISTER Done";
 			}
@@ -401,7 +401,7 @@ public class UserChatControllerImpl implements UserChatController {
 				for (int i = 0; i < allUsers.size(); i++) {
 					if ((allUsers.get(i).getUsername()).equals(username) && (allUsers.get(i).getPassword()).equals(password)) {
 						ok = true;
-						MessageToUserImpl m = new MessageToUserImpl();
+						MessageToConsumerImpl m = new MessageToConsumerImpl();
 						//System.out.println("saljem");
 						m.loginMessage(username, password);
 					}
@@ -458,7 +458,7 @@ public class UserChatControllerImpl implements UserChatController {
 				//jms queue jer su na istom portu...
 				
 				
-				MessageToUserImpl m = new MessageToUserImpl();
+				MessageToConsumerImpl m = new MessageToConsumerImpl();
 				//System.out.println("saljem");
 				m.logoutMessage(username);
 				

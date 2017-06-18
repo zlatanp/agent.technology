@@ -41,6 +41,7 @@ public class MDBConsumer implements MessageListener {
 		System.out.println("Chat primljeno");
 		String name;
 		String message;
+		String adresa;
 		String type = null;
 		String res = "";
 		TextMessage tmsg = (TextMessage) msg;
@@ -50,6 +51,7 @@ public class MDBConsumer implements MessageListener {
 			String pom[] = text.split("=");
 			name = pom[1];
 			message = pom[0];
+			adresa = pom[2];
 
 			// Daj mi sve pokrenute
 			try {
@@ -128,7 +130,7 @@ public class MDBConsumer implements MessageListener {
 			
 			try {
 
-				URL url2 = new URL("http://localhost:8080/ChatApp/rest/agents/receive/");
+				URL url2 = new URL("http://localhost:" + adresa + "/ChatApp/rest/agents/receive/");
 				HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
 				conn.setDoOutput(true);
 				conn.setRequestMethod("POST");

@@ -39,8 +39,15 @@
 			<tr>
 				<td>
 					<label>Enter command: </label>
-					<input type="text" id="text" /> 
-					<input type="button" id="send" value="send" />
+					<input type="text" id="command" /> 
+					<input onclick = "return komande()" type="button" id="send" value="send" />
+					<p>
+						Commands: <br>
+						"all types" - Get All Types Of Agents. <br>
+						"all running" - Get All Running Agents. <br>
+						"Start *type* *name*" - Starts new agent with specific type and name. <br>
+						"Send message to *name*" - Send message to agent with specfic name. 
+					</p>
 				</td>
 				<td>
 					<div id="izzlaz"
@@ -71,6 +78,7 @@
 		 inicijalizuj();
 		 //refresTipSelect();
 		 whenLogged();
+		 updateOutput();
 
 		 var tip = $("#selektTip").val();
 		 var name = $("#newAgentName").val();
@@ -94,11 +102,7 @@
 			                duration: 500
 			                }
 			       });
-
 			   });
-
-		   updateOutput();
-
 		});
 
 	function check(){
@@ -114,7 +118,6 @@
 	        	if(data.responseText == "oks")
 	        		setTimeout(wsbrisi, 11000);
 			}
-	        
 		});
 		}, 10000);
 	}
@@ -140,6 +143,74 @@
 		}, 2000);
 	}
 
+	function komande(){
+		var komanda = $("#command").val();
+
+		if(komanda == "all types")
+			dajTipove()
+			
+		if(komanda == "all running")
+			dajPokrenute()
+			
+		//run new agent
+		
+		if(komanda.startsWith("Start ")){
+
+		var text = komanda.split(" ");
+		
+		
+		var tip = text[1];
+		var name = text[2];
+		var fulladress = window.location.href;
+		var adr = fulladress.split(":");
+		var adress = adr[2].split("/");
+		var adres = adress[0];
+
+		if(!tip || tip.length === 0 || !name || name.length === 0){
+			alert("Type or Name can not be empty!");
+			return false;
+		}
+
+		var ok = false;
+		$("#selektTip").each(function(){
+			alert($())
+			if($(this).val() == tip)
+				ok = true;
+		});
+
+		if(!ok){
+			alert("Type does not exist!");
+		}else{
+
+		$.ajax({ 
+	        type: 'POST',
+	        url: 'rest/agents/running/'+tip+'/'+name + '/' + adres,
+	        dataType: 'json',
+	        complete: function(data){
+	        	if(data.responseText == "err"){
+		        	alert("Agent sa ovim imenom vec postoji!")
+		        }else{
+					alert("New agent added!");
+					dajPokrenute();
+					$("#newAgentName").val('');
+				}
+	        }
+		});	
+		}	
+
+		}
+
+
+		$("#command").val('');
+		return false;
+	}
+
+	$('#command').keypress(function(event) {
+    	if (event.keyCode == '13') {
+    		komande();
+	    }
+	});	
+	
 	function wsbrisi(){
 		socket.send("c00d5");
 	}
@@ -261,7 +332,7 @@
 
 		$.ajax({ 
 	        type: 'GET',
-	        url: 'rest/agents/sendMessage/'+ poruka + '/' + agentName,
+	        url: 'rest/agents/sendMessage/'+ poruka + '/' + agentName +'/' + atresa,
 	        dataType: 'json',
 	        success: function(data){
 	        	console.log(data);
