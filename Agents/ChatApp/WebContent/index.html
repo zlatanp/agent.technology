@@ -33,8 +33,22 @@
 					<button class="run" onclick="return runNewAgent()">Run New Agent</button>
 				</td>
 				<td><div id="kontejner"
-						style="overflow-y: scroll; height: 350px; width: 450px; background-color: white;">
+						style="overflow-y: scroll; height: 300px; width: 450px; background-color: white;">
 					</div></td>
+			</tr>
+			<tr>
+				<td>
+					<label>Enter command: </label>
+					<input type="text" id="text" /> 
+					<input type="button" id="send" value="send" />
+				</td>
+				<td>
+					<div id="kontejner"
+						style="overflow-y: scroll; height: 100px; background-color: white;">
+						<p>Output</p>
+					</div>
+					
+				</td>
 			</tr>
 		</table>
 	</div>
