@@ -24,7 +24,7 @@ public interface AcAcController {
 	String registerNewTypeOnMaster();
 	String getRunningAgents(String name, String adress);
 	ArrayList<AgentCentre> getAllCentres();
-	String runTask1();
+	void runTask1();
 	void SendMessage(String poruka, String name, String adresa);
 	void receiveMessage(String poruka);
 	String getOutput();

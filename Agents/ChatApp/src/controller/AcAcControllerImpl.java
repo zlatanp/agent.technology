@@ -735,7 +735,7 @@ public class AcAcControllerImpl implements AcAcController {
 	@Override
 	@POST
 	@Path("/check")
-	synchronized public String runTask1() {
+	synchronized public void runTask1() {
 		if (allCentres.size() > 1) {
 			int i;
 			for (i = 1; i < allCentres.size(); i++) {
@@ -767,12 +767,10 @@ public class AcAcControllerImpl implements AcAcController {
 						
 					}
 					conn.disconnect();
-					return "ok";
 
 				} catch (MalformedURLException e) {
 
 					System.out.println("m");
-					return "ok";
 
 				} catch (IOException e) {
 
@@ -782,17 +780,14 @@ public class AcAcControllerImpl implements AcAcController {
 					if (!before.equals("true")) { // mrtav
 						
 						deleteCent(adresa);
-						return "ws";
 					}else{
 						heartbeat.put(allCentres.get(i).getAdress(), "false");
-						return "oks";
 					}
 
 				}
 
 			}
 		}
-		return "ok";
 	}
 
 	@GET
