@@ -92,7 +92,7 @@ public class MDBConsumer implements MessageListener {
 			}
 
 			if (type.equals("Pong"))
-				res = name + ": No message\n";
+				res = name + ": Pong\n";
 
 			if (type.equals("Ping")) {
 				boolean pong = false;
@@ -105,7 +105,7 @@ public class MDBConsumer implements MessageListener {
 				}
 
 				if (pong) {
-					res = pongname + ": Pong\n";
+					res = pongname + ": " + message + "\n";
 				} else {
 					res = name + ": Ping\n";
 				}

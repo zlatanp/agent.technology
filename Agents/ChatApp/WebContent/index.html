@@ -46,7 +46,7 @@
 						"all types" - Get All Types Of Agents. <br>
 						"all running" - Get All Running Agents. <br>
 						"Start *type* *name*" - Starts new agent with specific type and name. <br>
-						"Send message to *name*" - Send message to agent with specfic name. 
+						"Send *message* to *name*" - Send message to agent with specfic name. 
 					</p>
 				</td>
 				<td>
@@ -172,11 +172,12 @@
 		}
 
 		var ok = false;
-		$("#selektTip").each(function(){
-			alert($())
-			if($(this).val() == tip)
+
+		var poom = document.getElementsByClassName("options");
+		for(var j=0; j<poom.length; j++){
+			if(tip == poom[j].innerHTML)
 				ok = true;
-		});
+		}
 
 		if(!ok){
 			alert("Type does not exist!");
@@ -200,6 +201,61 @@
 
 		}
 
+		if(komanda.startsWith("Send ")){
+
+			var text = komanda.split(" ");
+			
+			
+			var message = text[1];
+			var name = text[3];
+			var fulladress = window.location.href;
+			var adr = fulladress.split(":");
+			var adress = adr[2].split("/");
+			var adres = adress[0];
+
+			if(!message || message.length === 0 || !name || name.length === 0){
+				alert("Type or Name can not be empty!");
+				return false;
+			}
+
+			var ok = false;
+
+			//Da li postoji taj sa tim imenom
+			$.ajax({ 
+		        type: 'GET',
+		        url: 'rest/agents/dajSveRunning',
+		        dataType: 'json',
+		        success: function(data){
+		        	console.log(data);
+		        	if(data.length >0){
+						for(var i=0;i<data.length;i++){
+							var pom = data[i].id;
+							var type = pom.type;
+							if(pom.name == name){
+								ok = true;
+							}
+						}
+						if(!ok){
+							alert("Name does not exist!");
+						}else{
+							$.ajax({ 
+						        type: 'GET',
+						        url: 'rest/agents/sendMessage/'+ message + '/' + name +'/' + atresa,
+						        dataType: 'json',
+						        success: function(data){
+						        	console.log(data);
+						        	
+						        }
+						        
+							});
+						}
+				    } 
+		        }
+		        
+			});
+
+			
+		}
 
 		$("#command").val('');
 		return false;
@@ -254,7 +310,7 @@
 						}
 
 						if(!imaga){
-							$("#selektTip").append("<option value="+data[i].name+">"+ data[i].name +"</option>");
+							$("#selektTip").append("<option class=\"options\" value="+data[i].name+">"+ data[i].name +"</option>");
 							lista.push(data[i].name);
 							
 						}
