@@ -135,7 +135,7 @@
 		        	var text = data.responseText;
 		        	if(text.length > 0){
 			        	var pom = text.replace(/["']/g, "");
-			        	var planeText = pom.replace(/\\n/g, "<br>");
+			        	var planeText = pom.replace(/,/g, "<br>");
 			        	$("#izzlaz").html(planeText);
 		        	}
 			    }

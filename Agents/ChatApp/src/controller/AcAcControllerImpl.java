@@ -12,17 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import javax.ejb.AccessTimeout;
 import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
-import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.Timeout;
-import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -36,14 +31,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import jms.touser.MessageToConsumerImpl;
 import model.AID;
 import model.Agent;
 import model.AgentCentre;
 import model.AgentType;
-import model.Host;
 
 @Startup
 @Lock(LockType.READ)

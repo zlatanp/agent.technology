@@ -2,8 +2,6 @@ package jms.touser;
 
 import javax.ejb.Local;
 
-import model.User;
-
 @Local
 public interface MessageToConsumer {
 	

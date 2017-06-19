@@ -19,7 +19,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -38,9 +37,6 @@ import com.google.gson.reflect.TypeToken;
 
 import exceptions.AliasExistsException;
 import jms.touser.MessageToConsumerImpl;
-import model.Agent;
-import model.AgentCentre;
-import model.AgentType;
 import model.Host;
 import model.Message;
 import model.User;
