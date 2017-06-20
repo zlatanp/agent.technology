@@ -72,18 +72,18 @@ public class Agent {
 
 		if (id.getType().getName().equals("Ping")) {
 			boolean pong = false;
-			String pongname = "";
 			
+			Agent a = null;
 			
 			for (Agent agent : runningAgents) {
 				if (agent.getId().getType().getName().equals("Pong")) {
 					pong = true;
-					pongname = agent.getId().getName();
+					a = agent;
 				}
 			}
 
 			if (pong) {
-				res = pongname + ": " + message + ",";
+				a.sendPongMessage(message, adress);
 			} else {
 				res = name + ": Ping,";
 			}
@@ -107,6 +107,11 @@ public class Agent {
 			res += ",";
 		}
 		
+		sendMessage(res, adress);
+	}
+	
+	public void sendPongMessage(String message, String adress){
+		res = getId().getName() + ": " + message + ",";
 		sendMessage(res, adress);
 	}
 	
