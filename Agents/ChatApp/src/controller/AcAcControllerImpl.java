@@ -102,12 +102,10 @@ public class AcAcControllerImpl implements AcAcController {
 
 			if (myAdress.equals("http://localhost:8090/ChatApp/rest/") && !added90) {
 				ping.setModule("8090");
-				types.add(ping);
 				types.add(mapReduce);
 				added90 = true;
 			} else if (myAdress.equals("http://localhost:8100/ChatApp/rest/") && !added100) {
 				pong.setModule("8100");
-				types.add(pong);
 				types.add(contractNet);
 				added100 = true;
 			}
@@ -348,15 +346,21 @@ public class AcAcControllerImpl implements AcAcController {
 				runningAgents.remove(j);
 
 		}
+		
+		String whereUpdate = "";
+		if(adresa.equals("8090")){
+			whereUpdate = "8100";
+		}else{
+			whereUpdate = "8090";
+		}
+		
 
 		// Sad update svih
 
-		for (int i = 0; i < allCentres.size(); i++) {
-			System.out.println("ulazim u: " + allCentres.get(i).getAdress());
-			if (!allCentres.get(i).getAdress().equals(adresa)) {
+			System.out.println("ulazim u: " + whereUpdate);
 				try {
 					URL url = new URL(
-							"http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateCenters");
+							"http://localhost:" + whereUpdate + "/ChatApp/rest/agents/updateCenters");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -391,8 +395,7 @@ public class AcAcControllerImpl implements AcAcController {
 				}
 
 				try {
-					URL url = new URL("http://localhost:" + allCentres.get(i).getAdress()
-							+ "/ChatApp/rest/agents/updateTypesAll");
+					URL url = new URL("http://localhost:" + whereUpdate + "/ChatApp/rest/agents/updateTypesAll");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -428,7 +431,7 @@ public class AcAcControllerImpl implements AcAcController {
 
 				try {
 					URL url = new URL(
-							"http://localhost:" + allCentres.get(i).getAdress() + "/ChatApp/rest/agents/updateRunning");
+							"http://localhost:" + whereUpdate + "/ChatApp/rest/agents/updateRunning");
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setDoOutput(true);
 					conn.setRequestMethod("POST");
@@ -461,8 +464,7 @@ public class AcAcControllerImpl implements AcAcController {
 					e.printStackTrace();
 
 				}
-			}
-		}
+			
 	}
 
 	// MASTER UPDATE TIPOVA NOVOG
