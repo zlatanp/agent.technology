@@ -15,6 +15,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import model.ACLMessage;
+
 @Stateless
 @Local(MessageToConsumer.class)
 public class MessageToConsumerImpl implements MessageToConsumer {
@@ -51,7 +53,7 @@ public class MessageToConsumerImpl implements MessageToConsumer {
 	}
 
 	@Override
-	public void loginMessage(String username, String password) {
+	public void sendACLM(ACLMessage m) {
 		try {
 			initialise();
 		} catch (NamingException e1) {
@@ -60,7 +62,7 @@ public class MessageToConsumerImpl implements MessageToConsumer {
 		}
 		try {
 
-			TextMessage msg = session.createTextMessage("login=" + username + "=" + password);
+			TextMessage msg = session.createTextMessage("request=" + m.getContent() + "=" + m.getInReplyTo());
 			sender.send(msg);
 
 			destroy();

@@ -33,6 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.Gson;
 
 import jms.touser.MessageToConsumerImpl;
+import model.ACLMessage;
 import model.AID;
 import model.Agent;
 import model.AgentCentre;
@@ -823,6 +824,18 @@ public class AcAcControllerImpl implements AcAcController {
 		return new Gson().fromJson(output, type);
 	}
 	
+
+	@GET
+	@Path("/sendMessage/{poruka}/{name}/{adresa}")
+	public void send(@PathParam("poruka") String poruka, @PathParam("name") String name, @PathParam("adresa") String adresa) {
+		System.out.println(poruka + name + adresa);
+		ACLMessage message = new ACLMessage(name, poruka);
+		
+		MessageToConsumerImpl m = new MessageToConsumerImpl();
+		//System.out.println("saljem");
+		m.sendACLM(message);
+		
+	}
 	
 
 	// Generate random Alias for non-master chat app

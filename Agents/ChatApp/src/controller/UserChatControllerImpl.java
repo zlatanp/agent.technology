@@ -399,7 +399,7 @@ public class UserChatControllerImpl implements UserChatController {
 						ok = true;
 						MessageToConsumerImpl m = new MessageToConsumerImpl();
 						//System.out.println("saljem");
-						m.loginMessage(username, password);
+						//m.loginMessage(username, password);
 					}
 				
 				}

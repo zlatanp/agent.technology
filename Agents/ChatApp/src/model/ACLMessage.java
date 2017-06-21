@@ -6,7 +6,7 @@ import java.util.HashMap;
 public class ACLMessage {
 	
 	private Enum performative;
-	private AID sender;
+	private String sender;
 	private ArrayList<AID> receivers;
 	private AID replyTo;
 	private String content;
@@ -25,25 +25,9 @@ public class ACLMessage {
 		super();
 	}
 
-	public ACLMessage(Enum performative, AID sender, ArrayList<AID> receivers, AID replyTo, String content,
-			Object contentObj, HashMap<String, Object> userArgs, String language, String encoding, String ontology,
-			String protocol, String conversationId, String replyWith, String inReplyTo, Long replyBy) {
-		super();
-		this.performative = performative;
-		this.sender = sender;
-		this.receivers = receivers;
-		this.replyTo = replyTo;
+	public ACLMessage(String sender, String content) {
 		this.content = content;
-		this.contentObj = contentObj;
-		this.userArgs = userArgs;
-		Language = language;
-		Encoding = encoding;
-		Ontology = ontology;
-		Protocol = protocol;
-		ConversationId = conversationId;
-		this.replyWith = replyWith;
-		this.inReplyTo = inReplyTo;
-		this.replyBy = replyBy;
+		this.sender = sender;
 	}
 
 	public Enum getPerformative() {
@@ -54,11 +38,11 @@ public class ACLMessage {
 		this.performative = performative;
 	}
 
-	public AID getSender() {
+	public String getSender() {
 		return sender;
 	}
 
-	public void setSender(AID sender) {
+	public void setSender(String sender) {
 		this.sender = sender;
 	}
 
