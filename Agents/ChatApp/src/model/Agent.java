@@ -21,18 +21,16 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Stateless
 @Local(Agent.class)
 public class Agent {
-	
+
 	@Resource(mappedName = "java:/ConnectionFactory")
 	private ConnectionFactory factory;
 
@@ -44,13 +42,13 @@ public class Agent {
 	private QueueSession session;
 
 	private AID id;
-	
+
 	private String res = "";
 
 	public Agent() {
 		super();
 	}
-	
+
 	public Agent(AID id) {
 		super();
 		this.id = id;
@@ -63,20 +61,20 @@ public class Agent {
 	public void setId(AID id) {
 		this.id = id;
 	}
-	
-	public void receiveMessage(String name, String message, String adress, ArrayList<Agent> runningAgents){
+
+	public void receiveMessage(String name, String message, String adress, ArrayList<Agent> runningAgents) {
 		System.out.println(name + message + adress);
 		System.out.println(id.getType().getName());
-		
+
 		if (id.getType().getName().equals("Pong"))
 			res = name + ": Pong,";
 
 		if (id.getType().getName().equals("Ping")) {
 			boolean pong = false;
-			
+
 			Agent a = null;
 			ArrayList<Agent> listOfPongs = new ArrayList<Agent>();
-			
+
 			for (Agent agent : runningAgents) {
 				if (agent.getId().getType().getName().equals("Pong")) {
 					pong = true;
@@ -91,34 +89,74 @@ public class Agent {
 				res = name + ": Ping,";
 			}
 		}
-		
-		if(id.getType().getName().equals("MapReduce")){
+
+		if (id.getType().getName().equals("MapReduce")) {
 			Map<Character, Integer> freqList = new LinkedHashMap<Character, Integer>();
 			char[] charArray = message.toCharArray();
-			for(char key : charArray) {
-	            if(freqList.containsKey(key)) {
-	               freqList.put(key, freqList.get(key) + 1);
-	            } else
-	                freqList.put(key, 1);
-	        }
+			for (char key : charArray) {
+				if (freqList.containsKey(key)) {
+					freqList.put(key, freqList.get(key) + 1);
+				} else
+					freqList.put(key, 1);
+			}
 			res = name + ":";
-			for (Map.Entry<Character, Integer> entry : freqList.entrySet())
-			{
-			    System.out.println(entry.getKey() + ":" + entry.getValue());
-			    res += entry.getKey() + ":" + entry.getValue() + "; ";
+			for (Map.Entry<Character, Integer> entry : freqList.entrySet()) {
+				System.out.println(entry.getKey() + ":" + entry.getValue());
+				res += entry.getKey() + ":" + entry.getValue() + "; ";
 			}
 			res += ",";
 		}
-		
+
+		if (id.getType().getName().equals("ContractNet")) {
+			boolean cnet = false;
+			ArrayList<Agent> listOfContractNetAgents = new ArrayList<Agent>();
+
+			for (Agent agent : runningAgents) {
+				if (agent.getId().getType().getName().equals("ContractNet")
+						&& !agent.getId().getName().equals(name)) {
+					cnet = true;
+					listOfContractNetAgents.add(agent);
+				}
+			}
+
+			if (!cnet) {
+				res = name + ": No ContractNet agents.,";
+			} else {
+				res = name + ": Agents runned.,";
+				sendMessage(res, adress);
+				for (Agent agent : listOfContractNetAgents) {
+					if (agent.accept()) {
+						agent.sendContractMessage(name, message, adress);
+					}
+				}
+				res = name + ": Agents done.,";
+			}
+		}
 		sendMessage(res, adress);
 	}
-	
-	public void sendPongMessage(String message, String adress){
+
+	public boolean accept() {
+		int randomNum = ThreadLocalRandom.current().nextInt(0, 1 + 1);
+		if (randomNum == 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public void sendContractMessage(String name, String message, String adress) {
+
+		res = this.getId().getName() + " :Done: " + message +",";
+		sendMessage(res, adress);
+
+	}
+
+	public void sendPongMessage(String message, String adress) {
 		res = getId().getName() + ": " + message + ",";
 		sendMessage(res, adress);
 	}
-	
-	public void sendMessage(String res, String adress){
+
+	public void sendMessage(String res, String adress) {
 		try {
 			initialise();
 		} catch (NamingException e1) {
@@ -127,14 +165,14 @@ public class Agent {
 		}
 		try {
 			System.out.println("na agentu izlaz je:" + res);
-			TextMessage msg = session.createTextMessage("%" + res + "%"+ adress);
+			TextMessage msg = session.createTextMessage("%" + res + "%" + adress);
 			sender.send(msg);
 
 			destroy();
 		} catch (JMSException e) {
 		}
 	}
-	
+
 	public void initialise() throws NamingException {
 		try {
 			Context context = new InitialContext();
@@ -159,5 +197,5 @@ public class Agent {
 		} catch (JMSException e) {
 		}
 	}
-	
+
 }
