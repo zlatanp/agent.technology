@@ -3,6 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Resource;
 import javax.ejb.Local;
@@ -74,16 +75,18 @@ public class Agent {
 			boolean pong = false;
 			
 			Agent a = null;
+			ArrayList<Agent> listOfPongs = new ArrayList<Agent>();
 			
 			for (Agent agent : runningAgents) {
 				if (agent.getId().getType().getName().equals("Pong")) {
 					pong = true;
-					a = agent;
+					listOfPongs.add(agent);
 				}
 			}
 
 			if (pong) {
-				a.sendPongMessage(message, adress);
+				int randomNum = ThreadLocalRandom.current().nextInt(0, listOfPongs.size() + 1);
+				listOfPongs.get(randomNum).sendPongMessage(message, adress);
 			} else {
 				res = name + ": Ping,";
 			}
