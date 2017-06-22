@@ -62,7 +62,7 @@ public class MessageToConsumerImpl implements MessageToConsumer {
 		}
 		try {
 
-			TextMessage msg = session.createTextMessage("request=" + m.getContent() + "=" + m.getInReplyTo());
+			TextMessage msg = session.createTextMessage("performative=" + m.getPerformative() + "request=" + m.getContent() + "=" + m.getInReplyTo());
 			sender.send(msg);
 
 			destroy();

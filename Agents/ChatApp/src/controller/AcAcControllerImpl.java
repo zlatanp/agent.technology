@@ -32,6 +32,7 @@ import javax.ws.rs.core.UriInfo;
 
 import com.google.gson.Gson;
 
+import enumeration.Enum;
 import jms.touser.MessageToConsumerImpl;
 import model.ACLMessage;
 import model.AID;
@@ -826,11 +827,11 @@ public class AcAcControllerImpl implements AcAcController {
 	
 
 	@GET
-	@Path("/sendMessage/{poruka}/{name}/{adresa}")
-	public void send(@PathParam("poruka") String poruka, @PathParam("name") String name, @PathParam("adresa") String adresa) {
+	@Path("/sendMessagee/{poruka}/{name}/{adressa}")
+	public void send(@PathParam("poruka") String poruka, @PathParam("name") String name, @PathParam("adressa") String adresa) {
 		System.out.println(poruka + name + adresa);
 		ACLMessage message = new ACLMessage(name, poruka);
-		
+		message.setPerformative(Enum.REQUEST);
 		MessageToConsumerImpl m = new MessageToConsumerImpl();
 		//System.out.println("saljem");
 		m.sendACLM(message);
